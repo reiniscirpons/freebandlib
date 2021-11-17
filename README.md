@@ -1,3 +1,4 @@
+![logo](./images/logo.svg)
 # Freebandlib
 
 Reference implementations of algorithms for operating with elements in the
