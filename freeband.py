@@ -667,39 +667,3 @@ def digraph_topological_order(digraph: DigraphAdjacencyList) -> \
         return None
 
     return topo_order
-
-"""
-Section 9: Output functions
-
-TODO: writeup
-"""
-
-def dot_string(transducer: Transducer) -> str:
-    """ TODO: Description"""
-
-    state_attrs = "[shape=circle]"
-    out_alphabet = ["a", "b", "c", "d", "e"]
-    out_colors = ["red", "blue", "green", "orange", "cyan"]
-    def edge_attrs(letter, state_id, out_letter, child_id):
-        return "[color=" + out_colors[out_letter] + \
-               " label=\"" + str(letter) + "|" + out_alphabet[out_letter] + \
-               "\"]"
-
-    S = ["digraph {", "ordering=\"out\""]
-    for state_id, state in enumerate(transducer.states):
-        S.append(str(state_id) + state_attrs)
-        for letter in (0, 1):
-            child = state.next_state[letter]
-            if child is not None:
-                child_id = child.state_id
-                out_letter = state.next_letter[letter]
-                S.append(str(state_id) + " -> " + str(child_id) + \
-                         edge_attrs(letter, state_id, out_letter, child_id))
-        if transducer.terminal[state_id]:
-            S.append("terminal" + str(state_id) + " [shape=none label=\"\"]")
-            S.append(str(state_id) + " -> " + "terminal" + str(state_id))
-    S.append("initial [shape=none label=\"\"]")
-    S.append("initial -> " + str(transducer.initial))
-    S.append("}")
-    return "\n".join(S)
-
