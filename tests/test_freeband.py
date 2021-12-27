@@ -1,6 +1,6 @@
 """ Tests for algorithms implemented as part of freebandlib. """
-from freeband import InputLetter, OutputLetter, StateId, TransducerState,
-                     Transducer
+from freeband import InputLetter, OutputLetter, StateId, TransducerState, \
+    Transducer
 import freeband
 
 """
@@ -10,6 +10,7 @@ This section is a counterpart to Section 1 in freeband.py. The tests here are
 meant to check 
 """
 
+
 def is_valid_input_letter(letter: InputLetter) -> bool:
     """ Check that the input alphabet letter constraints hold.
 
@@ -17,6 +18,7 @@ def is_valid_input_letter(letter: InputLetter) -> bool:
         1) it is 0 or 1
     """
     return letter in (0, 1)
+
 
 def is_valid_output_letter(letter: OutputLetter) -> bool:
     """ Check that the output alphabet letter constraints hold.
@@ -26,6 +28,7 @@ def is_valid_output_letter(letter: OutputLetter) -> bool:
     """
     return isinstance(letter, int) and letter >= 0
 
+
 def is_valid_state_id(state_id: StateId) -> bool:
     """ Check that the state id constraints hold.
 
@@ -33,6 +36,7 @@ def is_valid_state_id(state_id: StateId) -> bool:
         1) it is a non-negative integer
     """
     return isinstance(state_id, int) and state_id >= 0
+
 
 def is_valid_transducer_state(state: TransducerState) -> bool:
     """ Check that the transducer state constraints hold.
@@ -55,11 +59,10 @@ def is_valid_transducer_state(state: TransducerState) -> bool:
        len(state.next_state) != 2:
         return False
 
-    for i in [0 , 1]:
-        if (state.next_state[i] is None and \
-            state.next_letter[i] is not None) or \
-           (state.next_state[i] is not None and \
-            state.next_letter[i] is None):
+    for i in [0, 1]:
+        if (state.next_state[i] is None and
+           state.next_letter[i] is not None) or \
+           (state.next_state[i] is not None and state.next_letter[i] is None):
             return False
         if state.next_letter[i] is not None and \
            not is_valid_output_letter(state.next_letter[i]):
@@ -70,12 +73,14 @@ def is_valid_transducer_state(state: TransducerState) -> bool:
 
     return True
 
+
 def is_valid_transducer(transducer: Transducer) -> bool:
     """ Check that the transducer constraints hold.
 
     A transducer is considered valid if:
         1) all its states are valid;
-        2) each states id is equal to its position in the transducer state list;
+        2) each states id is equal to its position in the transducer state
+           list;
         3) it is acyclic.
     Note that we do not require our transducers to be connected.
     """
@@ -84,6 +89,6 @@ def is_valid_transducer(transducer: Transducer) -> bool:
         return False
 
     for i, state in enumerate(states):
-        if not is_valid_transducer_state(state) or not state_id == i:
+        if not is_valid_transducer_state(state) or not state.state_id == i:
             return False
     return True

@@ -1,6 +1,6 @@
 """ Freebandlib: Reference implementations of algorithms for free bands. """
 from __future__ import annotations
-from typing import Callable, Dict, List, Literal, NewType, Optional, Set, Tuple
+from typing import Callable, Dict, List, Optional, Set, Tuple
 
 """
 Section 1: Types
@@ -8,12 +8,12 @@ Section 1: Types
 In this section we define the types we use for our algorithms. Furthermore, we
 give concrete datastructures that implement said types.
 
-These datastructures are tailored to our specific use-case and therefore are not
-intended to cover the full generality of transducer and semigroup theory.
-Rather we have choosen them to allow us to implement the algorithms described in
-the companion paper to this library (TODO:reference) in a fairly efficient and
-understandable manner while retaining the time and space complexities from the
-paper.
+These datastructures are tailored to our specific use-case and therefore are
+not intended to cover the full generality of transducer and semigroup theory.
+Rather we have choosen them to allow us to implement the algorithms described
+in the companion paper to this library (TODO:reference) in a fairly efficient
+and understandable manner while retaining the time and space complexities from
+the paper.
 """
 
 # Throughout this implementation, we assume that our input alphabet is {0, 1}
@@ -27,12 +27,13 @@ InputWord = List[InputLetter]
 # non-negative integers.
 StateId = int
 
+
 class TransducerState:
     """ A datastructure representing a transducer state.
 
-    We assume that our transducers are synchronous and deterministic, so that no
-    epsilon transitions are permitted, and each input letter leads to exactly
-    one state, and outputs exactly one output letter.
+    We assume that our transducers are synchronous and deterministic, so that
+    no epsilon transitions are permitted, and each input letter leads to
+    exactly one state, and outputs exactly one output letter.
 
     Since the input alphabet is always {0, 1}, we opt to store our state
     transition and letter transition functions as lists, where the i-th entry
@@ -57,21 +58,23 @@ class TransducerState:
 
     def next_state_id(self) -> List[Optional[StateId]]:
         """ Return the next state function in terms of state ids. """
-        return [state.state_id if state is not None else None \
+        return [state.state_id if state is not None else None
                 for state in self.next_state]
+
 
 class Transducer:
     """ A datastructure representing a transducer.
 
-    As before, we assume that our transducers are synchronous and deterministic.
-    In addition we assume that our transducers are acyclic. This implies the
-    function they realize have a finite domain but is a stronger condition.
+    As before, we assume that our transducers are synchronous and
+    deterministic.  In addition we assume that our transducers are acyclic.
+    This implies the function they realize have a finite domain but is a
+    stronger condition.
 
     We implement transducers as a collection of states along with a pointer to
     the initial states and a boolean list indicating if a state is terminal or
-    not. We require that each state of a transducer has a unique state id within
-    the transducer. Furthermore in implementation, the state id corresponds to
-    the states position in the state collection.
+    not. We require that each state of a transducer has a unique state id
+    within the transducer. Furthermore in implementation, the state id
+    corresponds to the states position in the state collection.
 
     Attributes:
         initial: the id of the initial state
@@ -163,8 +166,8 @@ class Transducer:
         """ Return the underlying graph of the transducer.
 
         Every transducer has an underlying digraph structure whose vertices are
-        given by states and there is an edge from one vertex to another if there
-        is a state transition between the corresponding states.
+        given by states and there is an edge from one vertex to another if
+        there is a state transition between the corresponding states.
 
         Returns:
             The adjacency list of the underlying graph of the transducer.
@@ -189,6 +192,7 @@ Section 2: Basic operations on transducers.
 TODO: writeup
 """
 
+
 def transducer_connected_states(transducer: Transducer) -> List[StateId]:
     """ Return all the connected state ids of a given transducer.
 
@@ -210,12 +214,14 @@ def transducer_connected_states(transducer: Transducer) -> List[StateId]:
     is_accessible = digraph_is_reachable(underlying_digraph,
                                          [transducer.initial])
     is_coaccessible = digraph_is_reachable(digraph_reverse(underlying_digraph),
-        [state_id for state_id in range(nr_states) \
-         if transducer.terminal[state_id]])
+                                           [state_id for state_id
+                                            in range(nr_states)
+                                            if transducer.terminal[state_id]])
 
-    result = [state_id for state_id in range(nr_states) \
+    result = [state_id for state_id in range(nr_states)
               if is_accessible[state_id] and is_coaccessible[state_id]]
     return result
+
 
 def transducer_topological_order(transducer: Transducer) -> \
         Optional[List[StateId]]:
@@ -225,7 +231,8 @@ def transducer_topological_order(transducer: Transducer) -> \
     sense with respect to the underlying digraph of the transducer
 
     We assume that our transducers are always acyclic, so this should always
-    return the topological order. For more info see `digraph_topological_order`.
+    return the topological order. For more info see
+    `digraph_topological_order`.
 
     Args:
         transducer: The transducer to order
@@ -234,6 +241,7 @@ def transducer_topological_order(transducer: Transducer) -> \
         The states in topological order, if one exists, and None otherwise.
     """
     return digraph_topological_order(transducer.underlying_digraph())
+
 
 def transducer_induced_subtransducer(transducer: Transducer,
                                      state_ids: List[StateId]) -> Transducer:
@@ -268,11 +276,14 @@ def transducer_induced_subtransducer(transducer: Transducer,
 
     return Transducer(initial, states, terminal)
 
+
 def transducer_trim(transducer: Transducer) -> Transducer:
     """
     """
     return transducer_induced_subtransducer(transducer,
-                transducer_connected_states(transducer))
+                                            transducer_connected_states(
+                                                transducer))
+
 
 def transducer_isomorphism(transducer1: Transducer,
                            transducer2: Transducer) -> bool:
@@ -319,6 +330,7 @@ def transducer_isomorphism(transducer1: Transducer,
 
     return True
 
+
 def transducer_minimize(transducer: Transducer) -> Transducer:
     """
     """
@@ -328,9 +340,11 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
     representative: List[StateId]
     state_tuple: Tuple[Tuple[Optional[StateId], ...],
                        Tuple[Optional[OutputLetter], ...]]
-    state_tuple_to_representative: Dict[Tuple[Tuple[Optional[StateId], ...],
-                                              Tuple[Optional[OutputLetter], ...]
-                                             ],
+    state_tuple_to_representative: Dict[Tuple[Tuple[Optional[StateId],
+                                                    ...],
+                                              Tuple[Optional[OutputLetter],
+                                                    ...]
+                                              ],
                                         StateId]
     state: TransducerState
     child: Optional[TransducerState]
@@ -356,7 +370,7 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
     state_tuple_to_representative = {}
     for state_id in reversed(topo_order):
         state = trim_transducer.states[state_id]
-        state_tuple = (tuple(representative[child_id] if child_id is not None \
+        state_tuple = (tuple(representative[child_id] if child_id is not None
                              else None for child_id in state.next_state_id()),
                        tuple(state.next_letter))
         if state_tuple not in state_tuple_to_representative:
@@ -379,9 +393,11 @@ Section 3: Basic operations on words.
 TODO: writeup
 """
 
+
 def cont(word: OutputWord) -> Set[OutputLetter]:
     """ Return the content of a word. """
     return set(word)
+
 
 def pref_ltof(word: OutputWord) -> Tuple[Optional[OutputWord],
                                          Optional[OutputLetter]]:
@@ -398,10 +414,12 @@ def pref_ltof(word: OutputWord) -> Tuple[Optional[OutputWord],
     # Only happens if word is the empty word
     return None, None
 
+
 def suff_ftol(word: OutputWord) -> Tuple[Optional[OutputWord],
                                          Optional[OutputLetter]]:
     """ Return the suffix and last to occur first letter of a word. """
     return pref_ltof(list(reversed(word)))
+
 
 def word_function(word: OutputWord) -> Callable[[InputWord],
                                                 Optional[OutputWord]]:
@@ -432,6 +450,7 @@ def word_function(word: OutputWord) -> Callable[[InputWord],
 
     return f_w
 
+
 def compute_right(k: int, w: OutputWord) -> List[Optional[int]]:
     """ TODO: description
     """
@@ -441,16 +460,17 @@ def compute_right(k: int, w: OutputWord) -> List[Optional[int]]:
     i: int
     j: int
 
-    current_cont = [0 for _ in range(max(w)+1)]
+    current_cont = [0 for _ in range(max(w) + 1)]
     current_k = 0
     right_k = [None for _ in range(len(w))]
     j = -1
     for i in range(len(w)):
         if i > 0:
-            current_cont[w[i-1]] -= 1
-            if current_cont[w[i-1]] == 0:
+            current_cont[w[i - 1]] -= 1
+            if current_cont[w[i - 1]] == 0:
                 current_k -= 1
-        while j < len(w)-1 and (current_cont[w[j+1]] != 0 or current_k < k):
+        while j < len(w) - 1 and (current_cont[w[j + 1]] != 0 or
+                                  current_k < k):
             j += 1
             if current_cont[w[j]] == 0:
                 current_k += 1
@@ -459,10 +479,11 @@ def compute_right(k: int, w: OutputWord) -> List[Optional[int]]:
             right_k[i] = j
     return right_k
 
+
 def compute_left(k: int, w: OutputWord) -> List[Optional[int]]:
     """ TODO: description
     """
-    result = [None if x is None else len(w)-1 - x \
+    result = [None if x is None else len(w) - 1 - x
               for x in compute_right(k, list(reversed(w)))]
     return list(reversed(result))
 
@@ -471,6 +492,7 @@ Section 4: Examples of transducers realizing f_w.
 
 TODO: writeup
 """
+
 
 def treelike_transducer(word: OutputWord) -> Transducer:
     """ Return the treelike transducer associated with a word. """
@@ -503,7 +525,8 @@ def treelike_transducer(word: OutputWord) -> Transducer:
 
     states = [TransducerState(0,
                               [transducer_pref.states[transducer_pref.initial],
-                               transducer_suff.states[transducer_suff.initial]],
+                               transducer_suff.states[transducer_suff.initial]
+                               ],
                               [ltof, ftol])]
     states.extend(transducer_pref.states)
     states.extend(transducer_suff.states)
@@ -512,6 +535,7 @@ def treelike_transducer(word: OutputWord) -> Transducer:
     terminal.extend(transducer_suff.terminal)
     transducer = Transducer(0, states, terminal)
     return transducer
+
 
 def interval_transducer(word: OutputWord) -> Transducer:
     """ TODO: description
@@ -528,8 +552,8 @@ def interval_transducer(word: OutputWord) -> Transducer:
     terminal: List[bool]
 
     size_cont = len(cont(word))
-    right = [compute_right(k, word) for k in range(1, size_cont+1)]
-    left = [compute_left(k, word) for k in range(1, size_cont+1)]
+    right = [compute_right(k, word) for k in range(1, size_cont + 1)]
+    left = [compute_left(k, word) for k in range(1, size_cont + 1)]
     
     states = [TransducerState(0, [None, None], [None, None])]
     # We use a hash dictionary to associate to each state representing pair
@@ -546,14 +570,14 @@ def interval_transducer(word: OutputWord) -> Transducer:
                                                   [states[0], states[0]],
                                                   [word[i], word[i]]))
                 else:
-                    r = right[k-1][i]
-                    l = left[k-1][j]
+                    r = right[k - 1][i]
+                    l = left[k - 1][j]
                     assert r is not None
                     assert l is not None
                     states.append(TransducerState(len(states),
-                        [states[interval_lookup[(i, r)]],
-                         states[interval_lookup[(l, j)]]],
-                        [word[r+1], word[l-1]]))
+                                  [states[interval_lookup[(i, r)]],
+                                   states[interval_lookup[(l, j)]]],
+                                  [word[r + 1], word[l - 1]]))
         for j, i in enumerate(left[k]):
             if i is not None and (i, j) not in interval_lookup:
                 # TODO: Remove duplicated code
@@ -563,16 +587,16 @@ def interval_transducer(word: OutputWord) -> Transducer:
                                                   [states[0], states[0]],
                                                   [word[i], word[i]]))
                 else:
-                    r = right[k-1][i]
-                    l = left[k-1][j]
+                    r = right[k - 1][i]
+                    l = left[k - 1][j]
                     assert r is not None
                     assert l is not None
                     states.append(TransducerState(len(states),
-                        [states[interval_lookup[(i, r)]],
-                         states[interval_lookup[(l, j)]]],
-                        [word[r+1], word[l-1]]))
+                                  [states[interval_lookup[(i, r)]],
+                                   states[interval_lookup[(l, j)]]],
+                                  [word[r + 1], word[l - 1]]))
 
-    initial = interval_lookup[(0, len(word)-1)]
+    initial = interval_lookup[(0, len(word) - 1)]
     terminal = [False for _ in range(len(states))]
     terminal[0] = True
 
@@ -580,21 +604,24 @@ def interval_transducer(word: OutputWord) -> Transducer:
     label: List[str] = ["" for _ in range(len(states))]
     for interval in interval_lookup:
         i, j = interval
-        label[interval_lookup[interval]] = str((i+1, j+1))
+        label[interval_lookup[interval]] = str((i + 1, j + 1))
     label[0] = "0"
 
     return Transducer(initial, states, terminal, label)
+
 
 def minimal_transducer(word: OutputWord) -> Transducer:
     """
     """
     return transducer_minimize(interval_transducer(word))
 
+
 """
 Section 5: Equality checking
 
 TODO: writeup
 """
+
 
 def equivalent_words(word1: OutputWord, word2: OutputWord) -> bool:
     """
@@ -630,6 +657,7 @@ Section 8: Graph utility functions
 DigraphVertex = int
 DigraphAdjacencyList = List[List[DigraphVertex]]
 
+
 def digraph_reverse(digraph: DigraphAdjacencyList) -> DigraphAdjacencyList:
     """ Return the adjacency list of the reverse digraph.
 
@@ -656,12 +684,13 @@ def digraph_reverse(digraph: DigraphAdjacencyList) -> DigraphAdjacencyList:
 
     return result
 
+
 def digraph_is_reachable(digraph: DigraphAdjacencyList,
                          start: List[DigraphVertex]) -> List[bool]:
     """ Determine for every vertex if it can be reached from any start vertex.
 
-    A vertex v is reachable from a vertex u if there is a directed path starting
-    at u and ending in v. Performs a simple breadth first traversal.
+    A vertex v is reachable from a vertex u if there is a directed path
+    starting at u and ending in v. Performs a simple breadth first traversal.
 
     Args:
         digraph: An adjacencyy list of the underlying digraph
@@ -692,6 +721,7 @@ def digraph_is_reachable(digraph: DigraphAdjacencyList,
 
     return seen
 
+
 def digraph_topological_order(digraph: DigraphAdjacencyList) -> \
         Optional[List[DigraphVertex]]:
     """ Return the digraph vertices in topological order, if possible.
@@ -708,7 +738,7 @@ def digraph_topological_order(digraph: DigraphAdjacencyList) -> \
         and None otherwise.
     """
     topo_order: List[DigraphVertex]
-    time_seen: List[int] 
+    time_seen: List[int]
     row: List[DigraphVertex]
     u: DigraphVertex
     v: DigraphVertex
