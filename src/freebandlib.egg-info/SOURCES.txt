@@ -1,7 +1,0 @@
-README.md
-pyproject.toml
-setup.cfg
-src/freebandlib.egg-info/PKG-INFO
-src/freebandlib.egg-info/SOURCES.txt
-src/freebandlib.egg-info/dependency_links.txt
-src/freebandlib.egg-info/top_level.txt
