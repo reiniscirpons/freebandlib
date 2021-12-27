@@ -77,14 +77,18 @@ class Transducer:
         initial: the id of the initial state
         states: a list containing all the transducer states
         terminal: a list indicating if the i-th state is terminal or not
+        label: a list of node labels. These are optional and only serve a
+        purpose for debugging or visualising
     """
     def __init__(self,
                  initial: Optional[StateId],
                  states: List[TransducerState],
-                 terminal: List[bool]):
+                 terminal: List[bool],
+                 label: List[str] = None):
         self.initial = initial
         self.states = states
         self.terminal = terminal
+        self.label = label
         self.normalize()
 
     def __repr__(self):
@@ -270,6 +274,50 @@ def transducer_trim(transducer: Transducer) -> Transducer:
     return transducer_induced_subtransducer(transducer,
                 transducer_connected_states(transducer))
 
+def transducer_isomorphism(transducer1: Transducer,
+                           transducer2: Transducer) -> bool:
+    """ Given two trim transducers, determine if they are isomorpic.
+    """
+    iso: List[Optional[StateId]]
+
+    if len(transducer1.states) == len(transducer2.states):
+        return False
+
+    if len(transducer1.states) == 0:
+        return True
+
+    if transducer1.initial is None or transducer2.initial is None:
+        return False
+
+    iso = [None for _ in transducer1.states]
+
+    iso[transducer1.initial] = transducer2.initial
+
+    que = [transducer1.states[transducer1.initial]]
+    while len(que) > 0:
+        state1 = que.pop()
+        state_id2 = iso[state1.state_id]
+        assert state_id2 is not None
+        state2 = transducer2.states[state_id2]
+        for input_letter, child1 in enumerate(state1.next_state):
+            child2 = state2.next_state[input_letter]
+            if child1 is not None:
+                if child2 is None:
+                    return False
+                if iso[child1.state_id] is not None and \
+                   iso[child1.state_id] != child2.state_id:
+                    return False
+                if iso[child1.state_id] is None:
+                    iso[child1.state_id] = child2.state_id
+                    que.append(child1)
+            elif child2 is not None:
+                return False
+
+    for state_id1, state_id2 in enumerate(iso):
+        if state_id2 is None:
+            return False
+
+    return True
 
 def transducer_minimize(transducer: Transducer) -> Transducer:
     """
@@ -435,7 +483,6 @@ def treelike_transducer(word: OutputWord) -> Transducer:
     transducer_suff: Transducer
     states: List[TransducerState]
     terminal: List[bool]
-    i: int
 
     if len(word) == 0:
         transducer = Transducer(0,
@@ -529,7 +576,14 @@ def interval_transducer(word: OutputWord) -> Transducer:
     terminal = [False for _ in range(len(states))]
     terminal[0] = True
 
-    return Transducer(initial, states, terminal)
+    # Store the (i, j) state labels for debugging and visualization purposes
+    label: List[str] = ["" for _ in range(len(states))]
+    for interval in interval_lookup:
+        i, j = interval
+        label[interval_lookup[interval]] = str((i+1, j+1))
+    label[0] = "0"
+
+    return Transducer(initial, states, terminal, label)
 
 def minimal_transducer(word: OutputWord) -> Transducer:
     """
@@ -541,6 +595,19 @@ Section 5: Equality checking
 
 TODO: writeup
 """
+
+def equivalent_words(word1: OutputWord, word2: OutputWord) -> bool:
+    """
+    """
+    return transducer_isomorphism(minimal_transducer(word1),
+                                  minimal_transducer(word2))
+
+def equivalent_transducers(transducer1: Transducer,
+                           transducer2: Transducer) -> bool:
+    """
+    """
+    return transducer_isomorphism(transducer_minimize(transducer1),
+                                  transducer_minimize(transducer2))
 
 """
 Section 6: Multiplication
