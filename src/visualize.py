@@ -1,9 +1,9 @@
 """ Transducer visualization algorithms for freebandlib. """
 from typing import Callable, List, Optional
 import math
-import graphviz
+# import graphviz
 import dot2tex
-from freeband import OutputLetter, StateId, Transducer, TransducerState
+from freeband import OutputLetter, StateId, Transducer
 
 # We use a generic parsing scheme which uses two helper functions to process
 # The edge labels and node labels
@@ -11,6 +11,7 @@ NodeFunction = Callable[[StateId, bool, bool], str]
 EdgeFunction = Callable[[StateId,
                          List[Optional[StateId]],
                          List[Optional[OutputLetter]]], str]
+
 
 def generic_transducer_parse(transducer: Transducer,
                              header: str,
@@ -27,8 +28,8 @@ def generic_transducer_parse(transducer: Transducer,
         definitions;
         node_fun   - a function which converts node data into its output
         string representation;
-        edge_fun   - a function which converts a give nodes out edge data into a
-        string representation.
+        edge_fun   - a function which converts a give nodes out edge data into
+        a string representation.
 
     Returns:
         An output string
@@ -36,12 +37,13 @@ def generic_transducer_parse(transducer: Transducer,
     S = [header]
     for state_id, _ in enumerate(transducer.states):
         S.append(node_fun(state_id,
-                          transducer.initial==state_id,
+                          transducer.initial == state_id,
                           transducer.terminal[state_id]))
     for state_id, state in enumerate(transducer.states):
         S.append(edge_fun(state_id, state.next_state_id(), state.next_letter))
     S.append(footer)
     return "\n".join(S)
+
 
 def dot_string(transducer: Transducer,
                node_label: Optional[List[str]] = None,
@@ -56,23 +58,26 @@ def dot_string(transducer: Transducer,
         # If no colors were provided, default to a preset color scheme
         header += "\nedge [colorscheme=\"set19\"] "
     footer = "}"
-    
-    def node_fun(state_id: StateId, is_initial: bool, is_terminal: bool) -> str:
-        S = [str(state_id)]
+
+    def node_fun(state_id: StateId,
+                 is_initial: bool,
+                 is_terminal: bool) -> str:
+        name = str(state_id)
+        S = [name]
 
         S.append("[")
         S.append(node_attrs)
         if node_label is not None:
-            S.append("label=\""+node_label[state_id]+"\"")
+            S.append("label=\"" + node_label[state_id] + "\"")
         S.append("]")
 
         if is_initial:
             S.append("\ninitial [shape=none label=\"\"]")
-            S.append("\ninitial -> " + str(state_id))
+            S.append("\ninitial -> " + name)
 
         if is_terminal:
-            S.append("\nterminal" + str(state_id) + " [shape=none label=\"\"]")
-            S.append("\n"+str(state_id) + " -> " + "terminal" + str(state_id))
+            S.append("\nterminal" + name + " [shape=none label=\"\"]")
+            S.append("\n" + name + " -> " + "terminal" + name)
 
         return " ".join(S)
 
@@ -91,7 +96,7 @@ def dot_string(transducer: Transducer,
                 if out_colors is not None:
                     color = out_colors[out_letter]
                 else:
-                    color = str(out_letter+1)
+                    color = str(out_letter + 1)
                 if edge_label:
                     S.append("color=" + color)
                     if out_alphabet is not None:
@@ -100,8 +105,8 @@ def dot_string(transducer: Transducer,
                         # If no out labels are given, convert number to letter,
                         # i.e.  0 -> a, 1 -> b, 2 -> c etc.
                         out_label = chr(ord("a") + out_letter)
-                    S.append("label=\"" + str(in_letter) + "|" + out_label +
-                                "\"")
+                    S.append("label=")
+                    S.append("\"" + str(in_letter) + "|" + out_label + "\"")
                 # Hack for tikz output
                 if in_letter == 0:
                     S.append("style=\"-latex\"")
@@ -113,45 +118,48 @@ def dot_string(transducer: Transducer,
     return generic_transducer_parse(transducer, header, footer,
                                     node_fun, edge_fun)
 
+
 def tikz_string(transducer: Transducer,
-               node_label: Optional[List[str]] = None,
-               edge_label: bool = True,
-               out_alphabet: Optional[List[str]] = None,
-               out_colors: Optional[List[str]] = None,
-               node_attrs: str = "shape=circle") -> str:
+                node_label: Optional[List[str]] = None,
+                edge_label: bool = True,
+                out_alphabet: Optional[List[str]] = None,
+                out_colors: Optional[List[str]] = None,
+                node_attrs: str = "shape=circle") -> str:
     """ TODO: Description
     """
 
     positions = dot2tex.dot2tex(dot_string(transducer), format="positions")
     mx = max(value[0] for value in positions.values())
     my = max(value[1] for value in positions.values())
-    positions = {key: (int(10*value[0]/mx), int(10*value[1]/my)) for key, value in
-            positions.items()}
+    positions = {key: (int(10 * value[0] / mx), int(10 * value[1] / my))
+                 for key, value in positions.items()}
 
     if out_colors is None:
         # If no colors were provided, default to a preset color scheme
-        out_colors = ["mycolor"+str(i) for i in range(8)]
+        out_colors = ["mycolor" + str(i) for i in range(8)]
 
     header = "\\begin{tikzpicture}"
     footer = "\\end{tikzpicture}"
-    
-    def node_fun(state_id: StateId, is_initial: bool, is_terminal: bool) -> str:
+
+    def node_fun(state_id: StateId,
+                 is_initial: bool,
+                 is_terminal: bool) -> str:
         x, y = positions[str(state_id)]
         S = ["\\node"]
-        S.append("(q_"+str(state_id)+")")
-        S.append("at "+"(" + str(x) + ","+str(y) + ")")
+        S.append("(q_" + str(state_id) + ")")
+        S.append("at " + "(" + str(x) + "," + str(y) + ")")
         if node_label is not None:
-            S.append("{$"+str(node_label[state_id])+"$};\n")
+            S.append("{$" + str(node_label[state_id]) + "$};\n")
         else:
             S.append("{};\n")
 
         if is_initial:
-            S.append("\n\\draw [-latex] (q_"+str(state_id)+")++(0,0.5)")
+            S.append("\n\\draw [-latex] (q_" + str(state_id) + ")++(0,0.5)")
             S.append("--")
-            S.append("(q_"+str(state_id)+");\n")
+            S.append("(q_" + str(state_id) + ");\n")
 
         if is_terminal:
-            S.append("\n\\draw [-latex] (q_"+str(state_id)+")")
+            S.append("\n\\draw [-latex] (q_" + str(state_id) + ")")
             S.append("--")
             S.append("++(0,-0.5);\n")
 
@@ -175,20 +183,20 @@ def tikz_string(transducer: Transducer,
                 elif in_letter == 1:
                     S.append("-latex reversed")
                 assert out_colors is not None
-                S.append(",draw="+out_colors[out_letter])
+                S.append(",draw=" + out_colors[out_letter])
                 S.append("]")
-                S.append("(q_"+str(state_id)+")")
+                S.append("(q_" + str(state_id) + ")")
                 S.append("to[")
                 x, y = positions[str(state_id)]
                 x1, y1 = positions[str(child_id)]
-                angle = int(180*math.atan2(y1-y, x1-x)/math.pi)
-                angle1 = int(180*math.atan2(y-y1, x-x1)/math.pi)
+                angle = int(180 * math.atan2(y1 - y, x1 - x) / math.pi)
+                angle1 = int(180 * math.atan2(y - y1, x - x1) / math.pi)
                 if in_letter == 0:
-                    S.append("out="+str(angle))
-                    S.append("in="+str(angle1))
+                    S.append("out=" + str(angle))
+                    S.append("in=" + str(angle1))
                 elif in_letter == 1:
-                    S.append("out="+str(angle))
-                    S.append("in="+str(angle1))
+                    S.append("out=" + str(angle))
+                    S.append("in=" + str(angle1))
                 S.append("]")
                 if edge_label:
                     if out_alphabet is not None:
@@ -198,8 +206,8 @@ def tikz_string(transducer: Transducer,
                         # i.e.  0 -> a, 1 -> b, 2 -> c etc.
                         out_label = chr(ord("a") + out_letter)
                     S.append("node[midway]")
-                    S.append("{$"+str(in_letter) + "|" + out_label + "$}")
-                S.append("(q_"+str(child_id)+");\n")
+                    S.append("{$" + str(in_letter) + "|" + out_label + "$}")
+                S.append("(q_" + str(child_id) + ");\n")
         else:
             for in_letter, child_id in enumerate(next_state_id):
                 if child_id is not None:
@@ -212,32 +220,34 @@ def tikz_string(transducer: Transducer,
                     elif in_letter == 1:
                         S.append("-latex reversed")
                     assert out_colors is not None
-                    S.append(",draw="+out_colors[out_letter])
+                    S.append(",draw=" + out_colors[out_letter])
                     S.append("]")
-                    S.append("(q_"+str(state_id)+")")
+                    S.append("(q_" + str(state_id) + ")")
                     S.append("--")
                     if edge_label:
                         if out_alphabet is not None:
                             out_label = out_alphabet[out_letter]
                         else:
-                            # If no out labels are given, convert number to letter,
-                            # i.e.  0 -> a, 1 -> b, 2 -> c etc.
+                            # If no out labels are given, convert number to
+                            # letter, i.e.  0 -> a, 1 -> b, 2 -> c etc.
                             out_label = chr(ord("a") + out_letter)
-                        S.append("node[midway]")
-                        S.append("{$"+str(in_letter) + "|" + out_label + "$}")
-                    S.append("(q_"+str(child_id)+");\n")
+                        S.append("node[midway]{")
+                        S.append("$" + str(in_letter) + "|" + out_label + "$")
+                        S.append("}")
+                    S.append("(q_" + str(child_id) + ");\n")
         return " ".join(S)
 
     return generic_transducer_parse(transducer, header, footer,
                                     node_fun, edge_fun)
 
+
 def tikz_string_dot2tex(transducer: Transducer,
-                codeonly=False,
-                node_label: Optional[List[str]] = None,
-                edge_label: bool = True,
-                out_alphabet: Optional[List[str]] = None,
-                out_colors: Optional[List[str]] = None,
-                node_attrs: str = "shape=circle") -> str:
+                        codeonly=False,
+                        node_label: Optional[List[str]] = None,
+                        edge_label: bool = True,
+                        out_alphabet: Optional[List[str]] = None,
+                        out_colors: Optional[List[str]] = None,
+                        node_attrs: str = "shape=circle") -> str:
     """ Generate tikz string using dot2tex.
 
     Uses dot2tex
@@ -245,18 +255,18 @@ def tikz_string_dot2tex(transducer: Transducer,
     docpreamble = ""
     if out_colors is None:
         # Use special default colors for tikz
-        docpreamble += "\n\\colorlet{mycolor0}{black}\n"+\
-                   "\\colorlet{mycolor1}{blue}\n"+\
-                   "\\colorlet{mycolor2}{red}\n"+\
-                   "\\colorlet{mycolor3}{blue!20!green!80!}\n"+\
-                   "\\colorlet{mycolor4}{red!20!yellow!80!}\n"+\
-                   "\\colorlet{mycolor5}{magenta}\n"+\
-                   "\\colorlet{mycolor6}{orange}\n"+\
-                   "\\colorlet{mycolor7}{cyan}\n"
-        out_colors = ["mycolor"+str(i) for i in range(8)]
+        docpreamble += "\n\\colorlet{mycolor0}{black}\n" + \
+                       "\\colorlet{mycolor1}{blue}\n" + \
+                       "\\colorlet{mycolor2}{red}\n" + \
+                       "\\colorlet{mycolor3}{blue!20!green!80!}\n" + \
+                       "\\colorlet{mycolor4}{red!20!yellow!80!}\n" + \
+                       "\\colorlet{mycolor5}{magenta}\n" + \
+                       "\\colorlet{mycolor6}{orange}\n" + \
+                       "\\colorlet{mycolor7}{cyan}\n"
+        out_colors = ["mycolor" + str(i) for i in range(8)]
 
     dot = dot_string(transducer, node_label, edge_label, out_alphabet,
                      out_colors, node_attrs)
     return dot2tex.dot2tex(dot, format="tikz", texmode="math", duplicate=True,
-            docpreamble=docpreamble, crop=True, codeonly=codeonly)
-
+                           docpreamble=docpreamble, crop=True,
+                           codeonly=codeonly)

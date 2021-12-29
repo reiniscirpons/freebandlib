@@ -387,6 +387,7 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
 
     return transducer_trim(trim_transducer)
 
+
 """
 Section 3: Basic operations on words.
 
@@ -454,28 +455,27 @@ def word_function(word: OutputWord) -> Callable[[InputWord],
 def compute_right(k: int, w: OutputWord) -> List[Optional[int]]:
     """ TODO: description
     """
-    current_cont: List[int]
-    current_k: int
+    curr_cont: List[int]
+    curr_k: int
     right_k: List[Optional[int]]
     i: int
     j: int
 
-    current_cont = [0 for _ in range(max(w) + 1)]
-    current_k = 0
+    curr_cont = [0 for _ in range(max(w) + 1)]
+    curr_k = 0
     right_k = [None for _ in range(len(w))]
     j = -1
     for i in range(len(w)):
         if i > 0:
-            current_cont[w[i - 1]] -= 1
-            if current_cont[w[i - 1]] == 0:
-                current_k -= 1
-        while j < len(w) - 1 and (current_cont[w[j + 1]] != 0 or
-                                  current_k < k):
+            curr_cont[w[i - 1]] -= 1
+            if curr_cont[w[i - 1]] == 0:
+                curr_k -= 1
+        while j < len(w) - 1 and (curr_cont[w[j + 1]] != 0 or curr_k < k):
             j += 1
-            if current_cont[w[j]] == 0:
-                current_k += 1
-            current_cont[w[j]] += 1
-        if current_k == k:
+            if curr_cont[w[j]] == 0:
+                curr_k += 1
+            curr_cont[w[j]] += 1
+        if curr_k == k:
             right_k[i] = j
     return right_k
 
@@ -486,6 +486,7 @@ def compute_left(k: int, w: OutputWord) -> List[Optional[int]]:
     result = [None if x is None else len(w) - 1 - x
               for x in compute_right(k, list(reversed(w)))]
     return list(reversed(result))
+
 
 """
 Section 4: Examples of transducers realizing f_w.
@@ -547,14 +548,14 @@ def interval_transducer(word: OutputWord) -> Transducer:
     interval_lookup: Dict[Tuple[int, int], StateId]
     i: Optional[int]
     j: Optional[int]
-    r: Optional[int]
-    l: Optional[int]
+    rr: Optional[int]
+    ll: Optional[int]
     terminal: List[bool]
 
     size_cont = len(cont(word))
     right = [compute_right(k, word) for k in range(1, size_cont + 1)]
     left = [compute_left(k, word) for k in range(1, size_cont + 1)]
-    
+
     states = [TransducerState(0, [None, None], [None, None])]
     # We use a hash dictionary to associate to each state representing pair
     # (i, j) the id of the state it corresponds to. This is not strictly
@@ -570,14 +571,14 @@ def interval_transducer(word: OutputWord) -> Transducer:
                                                   [states[0], states[0]],
                                                   [word[i], word[i]]))
                 else:
-                    r = right[k - 1][i]
-                    l = left[k - 1][j]
-                    assert r is not None
-                    assert l is not None
+                    rr = right[k - 1][i]
+                    ll = left[k - 1][j]
+                    assert rr is not None
+                    assert ll is not None
                     states.append(TransducerState(len(states),
-                                  [states[interval_lookup[(i, r)]],
-                                   states[interval_lookup[(l, j)]]],
-                                  [word[r + 1], word[l - 1]]))
+                                  [states[interval_lookup[(i, rr)]],
+                                   states[interval_lookup[(ll, j)]]],
+                                  [word[rr + 1], word[ll - 1]]))
         for j, i in enumerate(left[k]):
             if i is not None and (i, j) not in interval_lookup:
                 # TODO: Remove duplicated code
@@ -587,14 +588,14 @@ def interval_transducer(word: OutputWord) -> Transducer:
                                                   [states[0], states[0]],
                                                   [word[i], word[i]]))
                 else:
-                    r = right[k - 1][i]
-                    l = left[k - 1][j]
-                    assert r is not None
-                    assert l is not None
+                    rr = right[k - 1][i]
+                    ll = left[k - 1][j]
+                    assert rr is not None
+                    assert ll is not None
                     states.append(TransducerState(len(states),
-                                  [states[interval_lookup[(i, r)]],
-                                   states[interval_lookup[(l, j)]]],
-                                  [word[r + 1], word[l - 1]]))
+                                  [states[interval_lookup[(i, rr)]],
+                                   states[interval_lookup[(ll, j)]]],
+                                  [word[rr + 1], word[ll - 1]]))
 
     initial = interval_lookup[(0, len(word) - 1)]
     terminal = [False for _ in range(len(states))]
@@ -629,12 +630,14 @@ def equivalent_words(word1: OutputWord, word2: OutputWord) -> bool:
     return transducer_isomorphism(minimal_transducer(word1),
                                   minimal_transducer(word2))
 
+
 def equivalent_transducers(transducer1: Transducer,
                            transducer2: Transducer) -> bool:
     """
     """
     return transducer_isomorphism(transducer_minimize(transducer1),
                                   transducer_minimize(transducer2))
+
 
 """
 Section 6: Multiplication

@@ -1,13 +1,13 @@
 """ Tests for algorithms implemented as part of freebandlib. """
-from freeband import InputLetter, OutputLetter, StateId, TransducerState, \
+from freebandlib import InputLetter, OutputLetter, StateId, TransducerState, \
     Transducer
-import freeband
+import freebandlib
 
 """
 Section 1: Type validators
 
 This section is a counterpart to Section 1 in freeband.py. The tests here are
-meant to check 
+meant to check
 """
 
 
@@ -60,9 +60,11 @@ def is_valid_transducer_state(state: TransducerState) -> bool:
         return False
 
     for i in [0, 1]:
-        if (state.next_state[i] is None and
-           state.next_letter[i] is not None) or \
-           (state.next_state[i] is not None and state.next_letter[i] is None):
+        next_state = state.next_state[i]
+        next_letter = state.next_letter[i]
+        if next_state is None and next_letter is not None:
+            return False
+        if next_state is not None and next_letter is None:
             return False
         if state.next_letter[i] is not None and \
            not is_valid_output_letter(state.next_letter[i]):
@@ -84,7 +86,7 @@ def is_valid_transducer(transducer: Transducer) -> bool:
         3) it is acyclic.
     Note that we do not require our transducers to be connected.
     """
-    states = freeband.topological_order(transducer)
+    states = freebandlib.topological_order(transducer)
     if states is None:
         return False
 

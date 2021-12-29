@@ -1,6 +1,10 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
-src/*.egg-info/
 *.egg
 .tox/
+dist/
+build/
+docs/build/
+.coverage
+htmlcov/
