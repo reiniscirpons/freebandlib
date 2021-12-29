@@ -1,7 +1,7 @@
 """ Tests for algorithms implemented as part of freebandlib. """
-from freebandlib import InputLetter, OutputLetter, StateId, TransducerState, \
-    Transducer
-import freebandlib
+from freebandlib.freeband import InputLetter, OutputLetter, StateId, \
+    TransducerState, Transducer
+import freebandlib.freeband as freeband
 
 """
 Section 1: Type validators
@@ -86,7 +86,7 @@ def is_valid_transducer(transducer: Transducer) -> bool:
         3) it is acyclic.
     Note that we do not require our transducers to be connected.
     """
-    states = freebandlib.topological_order(transducer)
+    states = freeband.topological_order(transducer)
     if states is None:
         return False
 
