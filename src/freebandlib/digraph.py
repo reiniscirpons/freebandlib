@@ -49,7 +49,7 @@ def digraph_is_reachable(digraph: DigraphAdjacencyList,
     ----------
     digraph : DigraphAdjacencyList
         An adjacency list
-    start : List[Vertex]
+    start : List[DigraphVertex]
         The list of starting vertices.
 
     Returns

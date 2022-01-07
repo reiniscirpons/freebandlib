@@ -1,13 +1,14 @@
 """ Tests for freebandlib.digraph """
-from typing import List
+from typing import List, Optional
 
 import pytest  # type: ignore
 
 from freebandlib.digraph import (DigraphAdjacencyList, DigraphVertex,
-                                 digraph_is_reachable, digraph_reverse)
+                                 digraph_is_reachable, digraph_reverse,
+                                 digraph_topological_order)
 
 
-@pytest.mark.parametrize("digraph,reverse_digraph",
+@pytest.mark.parametrize("digraph, reverse_digraph",
                          [([], []),
                           ([[]], [[]]),
                           ([[], []], [[], []]),
@@ -50,7 +51,7 @@ def test_digraph_reverse(digraph: DigraphAdjacencyList,
     assert result == digraph
 
 
-@pytest.mark.parametrize("digraph,start,is_reachable",
+@pytest.mark.parametrize("digraph, start, is_reachable",
                          [([], [], []),
                           ([[]], [], [False]),
                           ([[]], [0], [True]),
@@ -122,3 +123,27 @@ def test_digraph_is_reachable(digraph: DigraphAdjacencyList,
                               is_reachable: List[bool]):
     """ Check that digraph_is_reachable is working correctly. """
     assert digraph_is_reachable(digraph, start) == is_reachable
+
+
+@pytest.mark.parametrize("digraph, orders",
+                         [([], [[]]),
+                          ([[]], [[0]]),
+                          ([[0]], [None]),
+                          ([[1], []], [[0, 1]]),
+                          ([[], [0]], [[1, 0]]),
+                          ([[1], [0]], [None]),
+                          ([[], []], [[0, 1], [1, 0]]),
+                          ([[1, 2], [], []], [[0, 1, 2], [0, 2, 1]]),
+                          ([[1, 2], [2], []], [[0, 1, 2]]),
+                          ([[1], [2], []], [[0, 1, 2]]),
+                          ([[1], [], [1]], [[0, 2, 1], [2, 0, 1]]),
+                          ([[1, 1, 1], [], [1]], [[0, 2, 1], [2, 0, 1]]),
+                          ([[1, 1, 1], [], [0]], [[2, 0, 1]]),
+                          ([[1, 1, 1], [2, 2], [0]], [None]),
+                          ([[1, 1, 1, 2, 2, 2], [3, 3], [], [2, 2]],
+                           [[0, 1, 3, 2]])
+                          ])
+def test_digraph_topological_sort(digraph: DigraphAdjacencyList,
+                                  orders: List[Optional[List[DigraphVertex]]]):
+    """ Check that digraph_topological_sort is working correctly. """
+    assert digraph_topological_order(digraph) in orders
