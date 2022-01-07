@@ -1,6 +1,8 @@
-""" Freebandlib: Reference implementations of algorithms for free bands. """
+"""Freebandlib: Reference implementations of algorithms for free bands."""
 from __future__ import annotations
 from typing import Callable, Dict, List, Optional, Set, Tuple
+from freebandlib.digraph import DigraphAdjacencyList, digraph_is_reachable, \
+    digraph_topological_order, digraph_reverse
 
 """
 Section 1: Types
@@ -29,7 +31,7 @@ StateId = int
 
 
 class TransducerState:
-    """ A datastructure representing a transducer state.
+    """A datastructure representing a transducer state.
 
     We assume that our transducers are synchronous and deterministic, so that
     no epsilon transitions are permitted, and each input letter leads to
@@ -45,6 +47,7 @@ class TransducerState:
         next_state: the state transition function
         next_letter: the letter transition function
     """
+
     def __init__(self,
                  state_id: StateId,
                  next_state: List[Optional[TransducerState]],
@@ -83,6 +86,7 @@ class Transducer:
         label: a list of node labels. These are optional and only serve a
         purpose for debugging or visualising
     """
+
     def __init__(self,
                  initial: Optional[StateId],
                  states: List[TransducerState],
@@ -453,7 +457,7 @@ def word_function(word: OutputWord) -> Callable[[InputWord],
 
 
 def compute_right(k: int, w: OutputWord) -> List[Optional[int]]:
-    """ TODO: description
+    """
     """
     curr_cont: List[int]
     curr_k: int
@@ -650,120 +654,3 @@ Section 7: Minimal word representative
 
 TODO: writeup
 """
-
-"""
-Section 8: Graph utility functions
-
-
-"""
-
-DigraphVertex = int
-DigraphAdjacencyList = List[List[DigraphVertex]]
-
-
-def digraph_reverse(digraph: DigraphAdjacencyList) -> DigraphAdjacencyList:
-    """ Return the adjacency list of the reverse digraph.
-
-    The reverse digraph of a digraph has the same set of vertices but has an
-    edge from u to v iff the original graph has an edge from v to u, i.e. all
-    the edges are reversed.
-
-    Args:
-        digraph: The digraph to reverse
-
-    Returns:
-        An adjacency list of the reverse digraph
-    """
-
-    result: DigraphAdjacencyList
-    row: List[DigraphVertex]
-    u: DigraphVertex
-    v: DigraphVertex
-
-    result = [[] for _ in digraph]
-    for u, row in enumerate(digraph):
-        for v in row:
-            result[v].append(u)
-
-    return result
-
-
-def digraph_is_reachable(digraph: DigraphAdjacencyList,
-                         start: List[DigraphVertex]) -> List[bool]:
-    """ Determine for every vertex if it can be reached from any start vertex.
-
-    A vertex v is reachable from a vertex u if there is a directed path
-    starting at u and ending in v. Performs a simple breadth first traversal.
-
-    Args:
-        digraph: An adjacencyy list of the underlying digraph
-        start: The list of starting vertices.
-
-    Returns:
-        A boolean list seen such that seen[v] is true if and only if vertex v
-        is reachable from some vertex in start.
-    """
-    que: List[DigraphVertex]
-    seen: List[bool]
-    i: int
-    u: DigraphVertex
-    v: DigraphVertex
-
-    i = 0
-    seen = [False for _ in digraph]
-    for u in start:
-        seen[u] = True
-    que = start
-    while i < len(que):
-        u = que[i]
-        for v in digraph[u]:
-            if not seen[v]:
-                que.append(v)
-                seen[v] = True
-        i += 1
-
-    return seen
-
-
-def digraph_topological_order(digraph: DigraphAdjacencyList) -> \
-        Optional[List[DigraphVertex]]:
-    """ Return the digraph vertices in topological order, if possible.
-
-    We say that the vertices are in topological order if no child vertex occurs
-    before its parent in the list. the function returns None if a topological
-    order does not exist (i.e. there is a directed cycle).
-
-    Args:
-        digraph: An adjacency list
-
-    Returns:
-        A list of vertices in topological order, if one exists,
-        and None otherwise.
-    """
-    topo_order: List[DigraphVertex]
-    time_seen: List[int]
-    row: List[DigraphVertex]
-    u: DigraphVertex
-    v: DigraphVertex
-    i: int
-    t: int
-
-    time_seen = [0 for _ in digraph]
-    for u, row in enumerate(digraph):
-        for v in row:
-            time_seen[v] += 1
-
-    topo_order = [u for u, t in enumerate(time_seen) if t == 0]
-    i = 0
-    while i < len(topo_order):
-        u = topo_order[i]
-        for v in digraph[u]:
-            time_seen[v] -= 1
-            if time_seen[v] == 0:
-                topo_order.append(v)
-        i += 1
-
-    if len(topo_order) != len(digraph):
-        return None
-
-    return topo_order

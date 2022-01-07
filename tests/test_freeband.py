@@ -94,3 +94,7 @@ def is_valid_transducer(transducer: Transducer) -> bool:
         if not is_valid_transducer_state(state) or not state.state_id == i:
             return False
     return True
+
+
+def test_true():
+    assert True
