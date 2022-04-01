@@ -3,6 +3,30 @@ Section 3: Basic operations on words.
 
 TODO: writeup
 """
+from __future__ import annotations
+
+from typing import Dict, List, Optional, Tuple
+
+InputLetter = int
+OutputLetter = int
+OutputWord = List[OutputLetter]
+InputWord = List[InputLetter]
+# Each transducer state is assigned an identifier. These are required to be
+# non-negative integers.
+StateId = int
+# Utility types for state transitions. Note that TransducerState
+# is defined below, but this is fine due to forward type declarations.
+TransducerState = None
+NextState = List[Optional[TransducerState]]  # noqa: F821
+NextStateId = List[Optional[StateId]]
+NextLetter = List[Optional[OutputLetter]]
+
+
+def _validate_output_word(word: OutputWord) -> None:
+    if not isinstance(word, list):
+        raise TypeError("the argument must be a list")
+    elif not all(lambda x: isinstance(x, int) for x in word):
+        raise TypeError("the argument must be a list of integers")
 
 
 def cont(word: OutputWord) -> Set[OutputLetter]:
@@ -14,6 +38,9 @@ def pref_ltof(
     word: OutputWord,
 ) -> Tuple[Optional[OutputWord], Optional[OutputLetter]]:
     """Return the prefix and first to occur last letter of a word."""
+
+    _validate_output_word(word)
+
     k = len(cont(word))
     j = 0
     seen = set()
@@ -31,7 +58,9 @@ def suff_ftol(
     word: OutputWord,
 ) -> Tuple[Optional[OutputWord], Optional[OutputLetter]]:
     """Return the suffix and last to occur first letter of a word."""
-    return pref_ltof(list(reversed(word)))
+    _validate_output_word(word)
+    suff, ftol = pref_ltof(list(reversed(word)))
+    return list(reversed(suff)), ftol
 
 
 def word_function(

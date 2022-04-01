@@ -28,19 +28,7 @@ from freebandlib.digraph import (
     digraph_topological_order,
 )
 
-InputLetter = int
-OutputLetter = int
-OutputWord = List[OutputLetter]
-InputWord = List[InputLetter]
-# Each transducer state is assigned an identifier. These are required to be
-# non-negative integers.
-StateId = int
-# Utility types for state transitions. Note that TransducerState
-# is defined below, but this is fine due to forward type declarations.
-TransducerState = None
-NextState = List[Optional[TransducerState]]  # noqa: F821
-NextStateId = List[Optional[StateId]]
-NextLetter = List[Optional[OutputLetter]]
+from freebandlib.words import pref_ltof, suff_ftol, StateId
 
 
 class TransducerState:
@@ -128,13 +116,46 @@ class Transducer:
         initial: Optional[StateId],
         states: List[TransducerState],
         terminal: List[bool],
-        label: List[str] = None,
+        label: str = None,
     ):
         self.initial = initial
         self.states = states
         self.terminal = terminal
         self.label = label
+        self.validate()  # TODO(RC) not sure if you want this here!
         self.normalize()
+
+    def validate(self):
+        if not (self.initial is None or isinstance(self.initial, StateId)):
+            raise RuntimeError("self.initial must be None or a StateId")
+        elif self.initial is not None and (
+            self.initial >= len(self.states) or self.initial < 0
+        ):
+            raise RuntimeError(
+                f"self.initial must be in the range [0, {len(self.states)}"
+            )
+        elif not (
+            isinstance(self.states, List)
+            and all(isinstance(x, TransducerState) for x in self.states)
+        ):
+            raise RuntimeError(
+                "self.states must be a list of TransducerState objects"
+            )
+        elif not (
+            isinstance(self.terminal, List)
+            and all(isinstance(x, bool) for x in self.terminal)
+        ):
+            raise RuntimeError("self.terminal must be a list of bools")
+        elif not (self.label is None or isinstance(self.label, str)):
+            raise RuntimeError("self.label must be None or a str")
+        elif len(self.states) != len(self.terminal):
+            raise RuntimeError(
+                "self.states and self.terminal must have equal length"
+            )
+        elif self.label is not None and len(self.states) != len(self.label):
+            raise RuntimeError(
+                "self.states and self.label must have equal length"
+            )
 
     def __repr__(self):
         """Generate a textual representation of the transducer."""
@@ -201,8 +222,6 @@ class Transducer:
         if self.initial is None:
             return None
         state: Optional[TransducerState] = self.states[self.initial]
-        if state is None:
-            return None
 
         result: OutputWord = []
         for letter in word:

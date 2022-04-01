@@ -2,14 +2,15 @@
 from random import randint, random, shuffle
 from typing import List
 
-# import pytest  # type: ignore
-
+import pytest
 from freebandlib.transducer import (
-    InputLetter,
-    StateId,
     Transducer,
     TransducerState,
+    transducer_connected_states,
+    treelike_transducer,
+    transducer_topological_order,
 )
+from freebandlib.words import InputLetter, StateId, pref_ltof, suff_ftol
 
 
 def random_transducer(
@@ -88,5 +89,101 @@ def random_transducer(
     return Transducer(None, states, terminal)
 
 
-def test_null():
-    assert True
+def test_transducer_validate():
+    try:
+        t = Transducer(None, [], [])
+    except RuntimeError as e:
+        assert False, f'empty transducer raised the exception "{e}"'
+    assert transducer_connected_states(t) == []
+    assert t.underlying_digraph() == []
+    assert t.traverse([]) is None
+
+    with pytest.raises(RuntimeError):
+        t = Transducer(0, [None], [False])
+
+
+def test_transducer_abac():
+    t = treelike_transducer([0, 1, 0, 2])
+
+    assert len(t.states) == 15
+    assert isinstance(t.states[0], TransducerState)
+    assert t.states[0].__repr__() == "(0, [1, 8], [2, 1])"
+    assert t.states[0].next_state_id() == [1, 8]
+    assert t.traverse([0, 0]) is None
+    assert t.traverse([0, 0, 0, 0]) is None
+    assert t.traverse([0, 0, 0]) == [2, 1, 0]
+    assert t.traverse([0, 0, 1]) == [2, 1, 0]
+    assert t.traverse([0, 1, 0]) == [2, 1, 0]
+    assert t.traverse([0, 1, 1]) == [2, 1, 0]
+    assert t.traverse([1, 0, 0]) == [1, 2, 0]
+    assert t.traverse([1, 0, 1]) == [1, 2, 0]
+    assert t.traverse([1, 1, 0]) == [1, 0, 2]
+    assert t.traverse([1, 1, 1]) == [1, 0, 2]
+    assert t.underlying_digraph() == [
+        [1, 8],
+        [2, 5],
+        [3, 4],
+        [],
+        [],
+        [6, 7],
+        [],
+        [],
+        [9, 12],
+        [10, 11],
+        [],
+        [],
+        [13, 14],
+        [],
+        [],
+    ]
+    assert transducer_connected_states(t) == [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+    ]
+
+
+def check_transducer_topo_order(t):
+    top = transducer_topological_order(t)
+    assert top is None or isinstance(top, list)
+    if top is None:
+        return
+    assert len(top) == len(t.states)
+    nbs = t.underlying_digraph()
+    for v, nbs_v in enumerate(nbs):
+        for w in nbs_v:
+            assert top.index(w) > top.index(v)
+
+
+def test_transducer_topo_order():
+    t = treelike_transducer([0, 1, 0, 2])
+    assert transducer_topological_order(t) == [
+        0,
+        1,
+        8,
+        2,
+        5,
+        9,
+        12,
+        3,
+        4,
+        6,
+        7,
+        10,
+        11,
+        13,
+        14,
+    ]
+    check_transducer_topo_order(t)
