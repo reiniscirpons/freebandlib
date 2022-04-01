@@ -2,18 +2,24 @@
 from random import randint, random, shuffle
 from typing import List
 
-import pytest  # type: ignore
+# import pytest  # type: ignore
 
-from freebandlib.transducer import (InputLetter, StateId, Transducer,
-                                    TransducerState)
+from freebandlib.transducer import (
+    InputLetter,
+    StateId,
+    Transducer,
+    TransducerState,
+)
 
 
-def random_transducer(nr_states: int,
-                      output_alphabet: int,
-                      edge_prob: float,
-                      terminal_prob: float,
-                      initial_prob: float,
-                      acyclic: bool = False) -> Transducer:
+def random_transducer(
+    nr_states: int,
+    output_alphabet: int,
+    edge_prob: float,
+    terminal_prob: float,
+    initial_prob: float,
+    acyclic: bool = False,
+) -> Transducer:
     """Generate a random transducer.
 
     Parameters
@@ -47,7 +53,8 @@ def random_transducer(nr_states: int,
     state_id: StateId
     states: List[TransducerState] = [
         TransducerState(state_id, [None, None], [None, None])
-        for state_id in state_ids]
+        for state_id in state_ids
+    ]
 
     state: TransducerState
     letter: InputLetter
@@ -57,12 +64,12 @@ def random_transducer(nr_states: int,
             if random() < edge_prob:
                 if acyclic and state_id != nr_states - 1:
                     state.next_letter[letter] = randint(0, output_alphabet - 1)
-                    state.next_state[letter] = states[randint(state_id + 1,
-                                                              nr_states - 1)]
+                    state.next_state[letter] = states[
+                        randint(state_id + 1, nr_states - 1)
+                    ]
                 elif not acyclic:
                     state.next_letter[letter] = randint(0, output_alphabet - 1)
-                    state.next_state[letter] = states[randint(0,
-                                                              nr_states - 1)]
+                    state.next_state[letter] = states[randint(0, nr_states - 1)]
     shuffle(states)
     for state_id, state in enumerate(states):
         if state.state_id == initial_id:
@@ -79,5 +86,3 @@ def random_transducer(nr_states: int,
     if random() < initial_prob:
         return Transducer(initial_id, states, terminal)
     return Transducer(None, states, terminal)
-
-def 

@@ -2,10 +2,16 @@
 
 from typing import Callable, Dict, List, Optional, Set, Tuple
 
-from freebandlib.transducer import (InputWord, OutputLetter, OutputWord,
-                                    StateId, Transducer, TransducerState,
-                                    transducer_isomorphism,
-                                    transducer_minimize)
+from freebandlib.transducer import (
+    InputWord,
+    OutputLetter,
+    OutputWord,
+    StateId,
+    Transducer,
+    TransducerState,
+    transducer_isomorphism,
+    transducer_minimize,
+)
 
 """
 Section 3: Basic operations on words.
@@ -15,13 +21,14 @@ TODO: writeup
 
 
 def cont(word: OutputWord) -> Set[OutputLetter]:
-    """ Return the content of a word. """
+    """Return the content of a word."""
     return set(word)
 
 
-def pref_ltof(word: OutputWord) -> Tuple[Optional[OutputWord],
-                                         Optional[OutputLetter]]:
-    """ Return the prefix and first to occur last letter of a word. """
+def pref_ltof(
+    word: OutputWord,
+) -> Tuple[Optional[OutputWord], Optional[OutputLetter]]:
+    """Return the prefix and first to occur last letter of a word."""
     k = len(cont(word))
     j = 0
     seen = set()
@@ -35,15 +42,18 @@ def pref_ltof(word: OutputWord) -> Tuple[Optional[OutputWord],
     return None, None
 
 
-def suff_ftol(word: OutputWord) -> Tuple[Optional[OutputWord],
-                                         Optional[OutputLetter]]:
-    """ Return the suffix and last to occur first letter of a word. """
+def suff_ftol(
+    word: OutputWord,
+) -> Tuple[Optional[OutputWord], Optional[OutputLetter]]:
+    """Return the suffix and last to occur first letter of a word."""
     return pref_ltof(list(reversed(word)))
 
 
-def word_function(word: OutputWord) -> Callable[[InputWord],
-                                                Optional[OutputWord]]:
-    """ Given a word w return return its associated function f_w. """
+def word_function(
+    word: OutputWord,
+) -> Callable[[InputWord], Optional[OutputWord]]:
+    """Given a word w return return its associated function f_w."""
+
     def f_w(input_word: InputWord) -> Optional[OutputWord]:
         result: OutputWord
         current_part: Optional[OutputWord]
@@ -72,8 +82,7 @@ def word_function(word: OutputWord) -> Callable[[InputWord],
 
 
 def compute_right(k: int, w: OutputWord) -> List[Optional[int]]:
-    """
-    """
+    """ """
     curr_cont: List[int]
     curr_k: int
     right_k: List[Optional[int]]
@@ -100,10 +109,11 @@ def compute_right(k: int, w: OutputWord) -> List[Optional[int]]:
 
 
 def compute_left(k: int, w: OutputWord) -> List[Optional[int]]:
-    """ TODO: description
-    """
-    result = [None if x is None else len(w) - 1 - x
-              for x in compute_right(k, list(reversed(w)))]
+    """TODO: description"""
+    result = [
+        None if x is None else len(w) - 1 - x
+        for x in compute_right(k, list(reversed(w)))
+    ]
     return list(reversed(result))
 
 
@@ -115,7 +125,7 @@ TODO: writeup
 
 
 def treelike_transducer(word: OutputWord) -> Transducer:
-    """ Return the treelike transducer associated with a word. """
+    """Return the treelike transducer associated with a word."""
     transducer: Transducer
     pref: Optional[OutputWord]
     suff: Optional[OutputWord]
@@ -127,11 +137,9 @@ def treelike_transducer(word: OutputWord) -> Transducer:
     terminal: List[bool]
 
     if len(word) == 0:
-        transducer = Transducer(0,
-                                [TransducerState(0,
-                                                 [None, None],
-                                                 [None, None])],
-                                [True])
+        transducer = Transducer(
+            0, [TransducerState(0, [None, None], [None, None])], [True]
+        )
         return transducer
 
     pref, ltof = pref_ltof(word)
@@ -143,11 +151,16 @@ def treelike_transducer(word: OutputWord) -> Transducer:
     assert transducer_pref.initial is not None
     assert transducer_suff.initial is not None
 
-    states = [TransducerState(0,
-                              [transducer_pref.states[transducer_pref.initial],
-                               transducer_suff.states[transducer_suff.initial]
-                               ],
-                              [ltof, ftol])]
+    states = [
+        TransducerState(
+            0,
+            [
+                transducer_pref.states[transducer_pref.initial],
+                transducer_suff.states[transducer_suff.initial],
+            ],
+            [ltof, ftol],
+        )
+    ]
     states.extend(transducer_pref.states)
     states.extend(transducer_suff.states)
     terminal = [False]
@@ -158,8 +171,7 @@ def treelike_transducer(word: OutputWord) -> Transducer:
 
 
 def interval_transducer(word: OutputWord) -> Transducer:
-    """ TODO: description
-    """
+    """TODO: description"""
     size_cont: int
     right: List[List[Optional[int]]]
     left: List[List[Optional[int]]]
@@ -186,35 +198,55 @@ def interval_transducer(word: OutputWord) -> Transducer:
             if j is not None and (i, j) not in interval_lookup:
                 interval_lookup[(i, j)] = len(states)
                 if k == 0:
-                    states.append(TransducerState(len(states),
-                                                  [states[0], states[0]],
-                                                  [word[i], word[i]]))
+                    states.append(
+                        TransducerState(
+                            len(states),
+                            [states[0], states[0]],
+                            [word[i], word[i]],
+                        )
+                    )
                 else:
                     rr = right[k - 1][i]
                     ll = left[k - 1][j]
                     assert rr is not None
                     assert ll is not None
-                    states.append(TransducerState(len(states),
-                                  [states[interval_lookup[(i, rr)]],
-                                   states[interval_lookup[(ll, j)]]],
-                                  [word[rr + 1], word[ll - 1]]))
+                    states.append(
+                        TransducerState(
+                            len(states),
+                            [
+                                states[interval_lookup[(i, rr)]],
+                                states[interval_lookup[(ll, j)]],
+                            ],
+                            [word[rr + 1], word[ll - 1]],
+                        )
+                    )
         for j, i in enumerate(left[k]):
             if i is not None and (i, j) not in interval_lookup:
                 # TODO: Remove duplicated code
                 interval_lookup[(i, j)] = len(states)
                 if k == 0:
-                    states.append(TransducerState(len(states),
-                                                  [states[0], states[0]],
-                                                  [word[i], word[i]]))
+                    states.append(
+                        TransducerState(
+                            len(states),
+                            [states[0], states[0]],
+                            [word[i], word[i]],
+                        )
+                    )
                 else:
                     rr = right[k - 1][i]
                     ll = left[k - 1][j]
                     assert rr is not None
                     assert ll is not None
-                    states.append(TransducerState(len(states),
-                                  [states[interval_lookup[(i, rr)]],
-                                   states[interval_lookup[(ll, j)]]],
-                                  [word[rr + 1], word[ll - 1]]))
+                    states.append(
+                        TransducerState(
+                            len(states),
+                            [
+                                states[interval_lookup[(i, rr)]],
+                                states[interval_lookup[(ll, j)]],
+                            ],
+                            [word[rr + 1], word[ll - 1]],
+                        )
+                    )
 
     initial = interval_lookup[(0, len(word) - 1)]
     terminal = [False for _ in range(len(states))]
@@ -231,8 +263,7 @@ def interval_transducer(word: OutputWord) -> Transducer:
 
 
 def minimal_transducer(word: OutputWord) -> Transducer:
-    """
-    """
+    """ """
     return transducer_minimize(interval_transducer(word))
 
 
@@ -244,18 +275,19 @@ TODO: writeup
 
 
 def equivalent_words(word1: OutputWord, word2: OutputWord) -> bool:
-    """
-    """
-    return transducer_isomorphism(minimal_transducer(word1),
-                                  minimal_transducer(word2))
+    """ """
+    return transducer_isomorphism(
+        minimal_transducer(word1), minimal_transducer(word2)
+    )
 
 
-def equivalent_transducers(transducer1: Transducer,
-                           transducer2: Transducer) -> bool:
-    """
-    """
-    return transducer_isomorphism(transducer_minimize(transducer1),
-                                  transducer_minimize(transducer2))
+def equivalent_transducers(
+    transducer1: Transducer, transducer2: Transducer
+) -> bool:
+    """ """
+    return transducer_isomorphism(
+        transducer_minimize(transducer1), transducer_minimize(transducer2)
+    )
 
 
 """

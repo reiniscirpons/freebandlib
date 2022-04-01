@@ -41,8 +41,9 @@ def digraph_reverse(digraph: DigraphAdjacencyList) -> DigraphAdjacencyList:
     return result
 
 
-def digraph_is_reachable(digraph: DigraphAdjacencyList,
-                         start: List[DigraphVertex]) -> List[bool]:
+def digraph_is_reachable(
+    digraph: DigraphAdjacencyList, start: List[DigraphVertex]
+) -> List[bool]:
     """For each vertex determine if it can be reached from any start vertex.
 
     Parameters
@@ -84,8 +85,9 @@ def digraph_is_reachable(digraph: DigraphAdjacencyList,
     return is_reachable
 
 
-def digraph_topological_order(digraph: DigraphAdjacencyList) -> \
-        Optional[List[DigraphVertex]]:
+def digraph_topological_order(
+    digraph: DigraphAdjacencyList,
+) -> Optional[List[DigraphVertex]]:
     """Return the digraph vertices in topological order if possible.
 
     Returns `None` if the digraph contains a directed cycle.
@@ -116,8 +118,9 @@ def digraph_topological_order(digraph: DigraphAdjacencyList) -> \
         for vertex_v in neighbours_u:
             times_seen[vertex_v] += 1
 
-    topo_order: List[DigraphVertex] = [u for u, t in enumerate(times_seen)
-                                       if t == 0]
+    topo_order: List[DigraphVertex] = [
+        u for u, t in enumerate(times_seen) if t == 0
+    ]
     i: int = 0
     while i < len(topo_order):
         vertex_u = topo_order[i]

@@ -21,8 +21,12 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Tuple
 
-from freeband.digraph import (DigraphAdjacencyList, digraph_is_reachable,
-                              digraph_reverse, digraph_topological_order)
+from freebandlib.digraph import (
+    DigraphAdjacencyList,
+    digraph_is_reachable,
+    digraph_reverse,
+    digraph_topological_order,
+)
 
 InputLetter = int
 OutputLetter = int
@@ -33,6 +37,7 @@ InputWord = List[InputLetter]
 StateId = int
 # Utility types for state transitions. Note that TransducerState
 # is defined below, but this is fine due to forward type declarations.
+TransducerState = None
 NextState = List[Optional[TransducerState]]  # noqa: F821
 NextStateId = List[Optional[StateId]]
 NextLetter = List[Optional[OutputLetter]]
@@ -62,10 +67,9 @@ class TransducerState:
     this transition is defined and `None` otherwise).
     """
 
-    def __init__(self,
-                 state_id: StateId,
-                 next_state: NextState,
-                 next_letter: NextLetter):
+    def __init__(
+        self, state_id: StateId, next_state: NextState, next_letter: NextLetter
+    ):
         self.state_id = state_id
         self.next_state = next_state
         self.next_letter = next_letter
@@ -76,8 +80,10 @@ class TransducerState:
 
     def next_state_id(self) -> NextStateId:
         """Return the next state function in terms of state ids."""
-        return [state.state_id if state is not None else None
-                for state in self.next_state]
+        return [
+            state.state_id if state is not None else None
+            for state in self.next_state
+        ]
 
 
 class Transducer:
@@ -117,11 +123,13 @@ class Transducer:
     corresponds to the states position in the state collection.
     """
 
-    def __init__(self,
-                 initial: Optional[StateId],
-                 states: List[TransducerState],
-                 terminal: List[bool],
-                 label: List[str] = None):
+    def __init__(
+        self,
+        initial: Optional[StateId],
+        states: List[TransducerState],
+        terminal: List[bool],
+        label: List[str] = None,
+    ):
         self.initial = initial
         self.states = states
         self.terminal = terminal
@@ -137,10 +145,12 @@ class Transducer:
         for i, state in enumerate(self.states):
             state.state_id = i
 
-    def add_state(self,
-                  next_state_id: List[StateId],
-                  next_letter: List[Optional[OutputLetter]],
-                  is_terminal: bool) -> TransducerState:
+    def add_state(
+        self,
+        next_state_id: List[StateId],
+        next_letter: List[Optional[OutputLetter]],
+        is_terminal: bool,
+    ) -> TransducerState:
         """Add a state to the transducer.
 
         This method modifies the transducer to have a new state with properties
@@ -160,10 +170,13 @@ class Transducer:
         TransducerState
             The state that was added to the transducer.
         """
-        self.states.append(TransducerState(
-            len(self.states),
-            [self.states[i] for i in next_state_id],
-            next_letter))
+        self.states.append(
+            TransducerState(
+                len(self.states),
+                [self.states[i] for i in next_state_id],
+                next_letter,
+            )
+        )
         self.terminal.append(is_terminal)
         return self.states[-1]
 
@@ -225,8 +238,10 @@ class Transducer:
         result: DigraphAdjacencyList = [[] for _ in self.states]
         for state in self.states:
             for state_id in state.next_state_id():
-                if state_id is not None and \
-                   state_id not in result[state.state_id]:
+                if (
+                    state_id is not None
+                    and state_id not in result[state.state_id]
+                ):
                     result[state.state_id].append(state_id)
 
         return result
@@ -264,22 +279,29 @@ def transducer_connected_states(transducer: Transducer) -> List[StateId]:
     nr_states: int = len(transducer.states)
 
     digraph: DigraphAdjacencyList = transducer.underlying_digraph()
-    is_accessible: List[bool] = digraph_is_reachable(digraph,
-                                                     [transducer.initial])
+    is_accessible: List[bool] = digraph_is_reachable(
+        digraph, [transducer.initial]
+    )
 
     digraph_rev: DigraphAdjacencyList = digraph_reverse(digraph)
-    terminal_states: List[StateId] = [state_id for state_id in range(nr_states)
-                                      if transducer.terminal[state_id]]
+    terminal_states: List[StateId] = [
+        state_id
+        for state_id in range(nr_states)
+        if transducer.terminal[state_id]
+    ]
     is_coaccessible = digraph_is_reachable(digraph_rev, terminal_states)
 
-    result: List[StateId] = [state_id for state_id in range(nr_states)
-                             if is_accessible[state_id]
-                             and is_coaccessible[state_id]]  # noqa: W503
+    result: List[StateId] = [
+        state_id
+        for state_id in range(nr_states)
+        if is_accessible[state_id] and is_coaccessible[state_id]
+    ]  # noqa: W503
     return result
 
 
-def transducer_topological_order(transducer: Transducer) -> \
-        Optional[List[StateId]]:
+def transducer_topological_order(
+    transducer: Transducer,
+) -> Optional[List[StateId]]:
     """Return the transducer states in topological order, if possible.
 
     We assume that our transducers are always acyclic, so this should always
@@ -308,8 +330,9 @@ def transducer_topological_order(transducer: Transducer) -> \
     return digraph_topological_order(digraph)
 
 
-def transducer_induced_subtransducer(transducer: Transducer,
-                                     state_ids: List[StateId]) -> Transducer:
+def transducer_induced_subtransducer(
+    transducer: Transducer, state_ids: List[StateId]
+) -> Transducer:
     """Return the subtransducer induced by the given states.
 
     Does not modify the input transducer.
@@ -342,16 +365,18 @@ def transducer_induced_subtransducer(transducer: Transducer,
     state: TransducerState
     letter: InputLetter
     child: Optional[TransducerState]
-    states: List[TransducerState] = [transducer.states[state_id]
-                                     for state_id in state_ids]
+    states: List[TransducerState] = [
+        transducer.states[state_id] for state_id in state_ids
+    ]
     for state in states:
         for letter, child in enumerate(state.next_state):
             if child is not None and not included[child.state_id]:
                 state.next_state[letter] = None
                 state.next_letter[letter] = None
 
-    terminal: List[bool] = [transducer.terminal[state_id]
-                            for state_id in state_ids]
+    terminal: List[bool] = [
+        transducer.terminal[state_id] for state_id in state_ids
+    ]
 
     initial: Optional[StateId]
     if transducer.initial is not None and included[transducer.initial]:
@@ -391,8 +416,9 @@ def transducer_trim(transducer: Transducer) -> Transducer:
     return transducer_induced_subtransducer(transducer, connected_states)
 
 
-def transducer_isomorphism(transducer1: Transducer,
-                           transducer2: Transducer) -> bool:
+def transducer_isomorphism(
+    transducer1: Transducer, transducer2: Transducer
+) -> bool:
     """Given two trim transducers, determine if they are isomorpic.
 
     Parameters
@@ -436,8 +462,10 @@ def transducer_isomorphism(transducer1: Transducer,
             if child1 is not None:
                 if child2 is None:
                     return False
-                if iso[child1.state_id] is not None and \
-                   iso[child1.state_id] != child2.state_id:
+                if (
+                    iso[child1.state_id] is not None
+                    and iso[child1.state_id] != child2.state_id
+                ):
                     return False
                 if iso[child1.state_id] is None:
                     iso[child1.state_id] = child2.state_id
@@ -485,14 +513,15 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
     .. [1] TODO: Revuz minimization
 
     """
-    state_tuple: Tuple[Tuple[Optional[StateId], ...],
-                       Tuple[Optional[OutputLetter], ...]]
-    state_tuple_to_representative: Dict[Tuple[Tuple[Optional[StateId],
-                                                    ...],
-                                              Tuple[Optional[OutputLetter],
-                                                    ...]
-                                              ],
-                                        StateId]
+    state_tuple: Tuple[
+        Tuple[Optional[StateId], ...], Tuple[Optional[OutputLetter], ...]
+    ]
+    state_tuple_to_representative: Dict[
+        Tuple[
+            Tuple[Optional[StateId], ...], Tuple[Optional[OutputLetter], ...]
+        ],
+        StateId,
+    ]
 
     trim_transducer: Transducer = transducer_trim(transducer)
 
@@ -500,8 +529,9 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
         return Transducer(None, [], [])
 
     nr_states: int = len(trim_transducer.states)
-    topo_order: Optional[List[StateId]] = \
-        transducer_topological_order(trim_transducer)
+    topo_order: Optional[List[StateId]] = transducer_topological_order(
+        trim_transducer
+    )
     # The following assertion will always pass as our transducers are assumed
     # to be acyclic
     assert topo_order is not None
@@ -519,21 +549,27 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
     state_tuple_to_representative = {}
     for state_id in reversed(topo_order):
         state = trim_transducer.states[state_id]
-        state_tuple = (tuple(representative[child_id] if child_id is not None
-                             else None for child_id in state.next_state_id()),
-                       tuple(state.next_letter))
+        state_tuple = (
+            tuple(
+                representative[child_id] if child_id is not None else None
+                for child_id in state.next_state_id()
+            ),
+            tuple(state.next_letter),
+        )
         if state_tuple not in state_tuple_to_representative:
             state_tuple_to_representative[state_tuple] = state_id
         else:
-            representative[state_id] = \
-                state_tuple_to_representative[state_tuple]
+            representative[state_id] = state_tuple_to_representative[
+                state_tuple
+            ]
 
     child: Optional[TransducerState]
     letter: InputLetter
     for state_id, state in enumerate(trim_transducer.states):
         for letter, child in enumerate(state.next_state):
             if child is not None:
-                state.next_state[letter] = \
-                    trim_transducer.states[representative[child.state_id]]
+                state.next_state[letter] = trim_transducer.states[
+                    representative[child.state_id]
+                ]
 
     return transducer_trim(trim_transducer)
