@@ -1,15 +1,20 @@
-"""
-Section 1: Types
+"""Transducer utility functions.
 
-In this section we define the types we use for our algorithms. Furthermore, we
-give concrete datastructures that implement said types.
+In this section we implement datastructures and algorithms for representing and
+working with transducers.
 
 These datastructures are tailored to our specific use-case and therefore are
-not intended to cover the full generality of transducer and semigroup theory.
+not intended to cover the full generality of transducer theory.
 Rather we have choosen them to allow us to implement the algorithms described
 in the companion paper to this library (TODO:reference) in a fairly efficient
 and understandable manner while retaining the time and space complexities from
 the paper.
+
+In particular, throughout this implementation, we assume that our input
+alphabet is :math:`{0, 1}` and our output alphabets are always finite sets of
+the form :math:`{0, 1, ..., n}` for some :math`n`.
+
+TODO: Finish
 """
 
 from __future__ import annotations
@@ -19,9 +24,6 @@ from typing import Dict, List, Optional, Tuple
 from freeband.digraph import (DigraphAdjacencyList, digraph_is_reachable,
                               digraph_reverse, digraph_topological_order)
 
-# Throughout this implementation, we assume that our input alphabet is {0, 1}
-# and our output alphabets are always sets of the form {0, 1, ..., n} for some
-# n.
 InputLetter = int
 OutputLetter = int
 OutputWord = List[OutputLetter]
@@ -29,7 +31,7 @@ InputWord = List[InputLetter]
 # Each transducer state is assigned an identifier. These are required to be
 # non-negative integers.
 StateId = int
-# We also define utility types for state transitions. Note that TransducerState
+# Utility types for state transitions. Note that TransducerState
 # is defined below, but this is fine due to forward type declarations.
 NextState = List[Optional[TransducerState]]  # noqa: F821
 NextStateId = List[Optional[StateId]]
