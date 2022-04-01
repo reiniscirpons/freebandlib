@@ -573,3 +573,153 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
                 ]
 
     return transducer_trim(trim_transducer)
+
+
+"""
+Section 4: Examples of transducers realizing f_w.
+
+TODO: writeup
+"""
+
+
+def treelike_transducer(word: OutputWord) -> Transducer:
+    """Return the treelike transducer associated with a word."""
+    transducer: Transducer
+    pref: Optional[OutputWord]
+    suff: Optional[OutputWord]
+    ltof: Optional[OutputLetter]
+    ftol: Optional[OutputLetter]
+    transducer_pref: Transducer
+    transducer_suff: Transducer
+    states: List[TransducerState]
+    terminal: List[bool]
+
+    if len(word) == 0:
+        transducer = Transducer(
+            0, [TransducerState(0, [None, None], [None, None])], [True]
+        )
+        return transducer
+
+    pref, ltof = pref_ltof(word)
+    suff, ftol = suff_ftol(word)
+    assert pref is not None
+    assert suff is not None
+    transducer_pref = treelike_transducer(pref)
+    transducer_suff = treelike_transducer(suff)
+    assert transducer_pref.initial is not None
+    assert transducer_suff.initial is not None
+
+    states = [
+        TransducerState(
+            0,
+            [
+                transducer_pref.states[transducer_pref.initial],
+                transducer_suff.states[transducer_suff.initial],
+            ],
+            [ltof, ftol],
+        )
+    ]
+    states.extend(transducer_pref.states)
+    states.extend(transducer_suff.states)
+    terminal = [False]
+    terminal.extend(transducer_pref.terminal)
+    terminal.extend(transducer_suff.terminal)
+    transducer = Transducer(0, states, terminal)
+    return transducer
+
+
+def interval_transducer(word: OutputWord) -> Transducer:
+    """TODO: description"""
+    size_cont: int
+    right: List[List[Optional[int]]]
+    left: List[List[Optional[int]]]
+    states: List[TransducerState]
+    interval_lookup: Dict[Tuple[int, int], StateId]
+    i: Optional[int]
+    j: Optional[int]
+    rr: Optional[int]
+    ll: Optional[int]
+    terminal: List[bool]
+
+    size_cont = len(cont(word))
+    right = [compute_right(k, word) for k in range(1, size_cont + 1)]
+    left = [compute_left(k, word) for k in range(1, size_cont + 1)]
+
+    states = [TransducerState(0, [None, None], [None, None])]
+    # We use a hash dictionary to associate to each state representing pair
+    # (i, j) the id of the state it corresponds to. This is not strictly
+    # speaking linear, however a linear runtime can be achieved for example by
+    # using radix sort as in the Radoszewski-Rytter paper.
+    interval_lookup = {}
+    for k in range(size_cont):
+        for i, j in enumerate(right[k]):
+            if j is not None and (i, j) not in interval_lookup:
+                interval_lookup[(i, j)] = len(states)
+                if k == 0:
+                    states.append(
+                        TransducerState(
+                            len(states),
+                            [states[0], states[0]],
+                            [word[i], word[i]],
+                        )
+                    )
+                else:
+                    rr = right[k - 1][i]
+                    ll = left[k - 1][j]
+                    assert rr is not None
+                    assert ll is not None
+                    states.append(
+                        TransducerState(
+                            len(states),
+                            [
+                                states[interval_lookup[(i, rr)]],
+                                states[interval_lookup[(ll, j)]],
+                            ],
+                            [word[rr + 1], word[ll - 1]],
+                        )
+                    )
+        for j, i in enumerate(left[k]):
+            if i is not None and (i, j) not in interval_lookup:
+                # TODO: Remove duplicated code
+                interval_lookup[(i, j)] = len(states)
+                if k == 0:
+                    states.append(
+                        TransducerState(
+                            len(states),
+                            [states[0], states[0]],
+                            [word[i], word[i]],
+                        )
+                    )
+                else:
+                    rr = right[k - 1][i]
+                    ll = left[k - 1][j]
+                    assert rr is not None
+                    assert ll is not None
+                    states.append(
+                        TransducerState(
+                            len(states),
+                            [
+                                states[interval_lookup[(i, rr)]],
+                                states[interval_lookup[(ll, j)]],
+                            ],
+                            [word[rr + 1], word[ll - 1]],
+                        )
+                    )
+
+    initial = interval_lookup[(0, len(word) - 1)]
+    terminal = [False for _ in range(len(states))]
+    terminal[0] = True
+
+    # Store the (i, j) state labels for debugging and visualization purposes
+    label: List[str] = [""] * len(states)
+    for interval in interval_lookup:
+        i, j = interval
+        label[interval_lookup[interval]] = str((i + 1, j + 1))
+    label[0] = "0"
+
+    return Transducer(initial, states, terminal, label)
+
+
+def minimal_transducer(word: OutputWord) -> Transducer:
+    """ """
+    return transducer_minimize(interval_transducer(word))

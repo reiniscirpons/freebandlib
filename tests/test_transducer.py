@@ -86,3 +86,7 @@ def random_transducer(
     if random() < initial_prob:
         return Transducer(initial_id, states, terminal)
     return Transducer(None, states, terminal)
+
+
+def test_null():
+    assert True

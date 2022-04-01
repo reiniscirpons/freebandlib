@@ -253,7 +253,7 @@ def interval_transducer(word: OutputWord) -> Transducer:
     terminal[0] = True
 
     # Store the (i, j) state labels for debugging and visualization purposes
-    label: List[str] = ["" for _ in range(len(states))]
+    label: List[str] = [""] * len(states)
     for interval in interval_lookup:
         i, j = interval
         label[interval_lookup[interval]] = str((i + 1, j + 1))
