@@ -17,7 +17,7 @@ StateId = int
 # Utility types for state transitions. Note that TransducerState
 # is defined below, but this is fine due to forward type declarations.
 TransducerState = None
-NextState = List[Optional[TransducerState]]  # noqa: F821
+NextState = List[Optional[TransducerState]]
 NextStateId = List[Optional[StateId]]
 NextLetter = List[Optional[OutputLetter]]
 

@@ -532,6 +532,7 @@ def transducer_isomorphism(
                 if iso[child1.state_id] is None:
                     iso[child1.state_id] = child2.state_id
                     que.append(child1)
+
             elif child2 is not None:
                 return False
 
@@ -780,6 +781,55 @@ def interval_transducer(word: OutputWord) -> Transducer:
     label[0] = "0"
 
     return Transducer(initial, states, terminal, label)
+
+
+def transducer_precompute_q(
+    transducer: Transducer, letter: InputLetter
+) -> List[StateId]:
+    """Given a transducer and letter, repeatedly transition along the letter.
+
+    Parameters
+    ----------
+    transducer: Transducer
+    letter: InputLetter
+
+    Returns
+    -------
+    List[StateId]
+        The list of states `[q_0, q_1, q_2, ..., q_n]` where `q_0` is the
+        initial state of `transducer` and there is a transition from `q_i`
+        into `q_{i+1}` labelled by input letter `letter`.
+    """
+
+    if transducer.initial is None:
+        return []
+
+    state: Optional[TransducerState] = transducer.states[transducer.initial]
+    result: List[TransducerState] = []
+    while state is not None:
+        result.append(state)
+        state = state.next_state[letter]
+    return result
+
+
+def transducer_cont(transducer: Transducer) -> Set[OutputLetter]:
+    """Return the content of the free band element represented by `transducer`.
+
+    Parameters
+    ----------
+    transducer: Transducer
+
+    Returns
+    -------
+    Set[OutputLetter]
+    """
+    q = transducer_precompute_q(transducer, 0)
+    content = set()
+    for state_id in q:
+        state = transducer.state[state_id]
+        if state.next_letter[0] is not None:
+            content.add(state.next_letter[0])
+    return content
 
 
 def minimal_transducer(word: OutputWord) -> Transducer:
