@@ -27,8 +27,14 @@ from freebandlib.digraph import (
     digraph_reverse,
     digraph_topological_order,
 )
-
-from freebandlib.words import pref_ltof, suff_ftol, StateId
+from freebandlib.words import (
+    StateId,
+    compute_left,
+    compute_right,
+    cont,
+    pref_ltof,
+    suff_ftol,
+)
 
 
 class TransducerState:
@@ -40,7 +46,7 @@ class TransducerState:
         The identifier associated to this state
     next_state: NextState
         The state transition function
-    next_letter:
+    next_letter: List[letter]
         The letter transition function
 
     Notes
@@ -116,7 +122,7 @@ class Transducer:
         initial: Optional[StateId],
         states: List[TransducerState],
         terminal: List[bool],
-        label: str = None,
+        label: List[str] = None,
     ):
         self.initial = initial
         self.states = states
@@ -124,6 +130,24 @@ class Transducer:
         self.label = label
         self.validate()  # TODO(RC) not sure if you want this here!
         self.normalize()
+
+    def copy(self) -> Transducer:
+        states = [
+            TransducerState(x.state_id, [None] * 2, x.next_letter[::])
+            for x in self.states
+        ]
+        for i, old_state in enumerate(self.states):
+            states[i].next_state = [
+                states[x.state_id] if x is not None else None
+                for x in old_state.next_state
+            ]
+
+        return Transducer(
+            self.initial,
+            states,
+            self.terminal[::],
+            self.label[::] if self.label is not None else None,
+        )
 
     def validate(self):
         if not (self.initial is None or isinstance(self.initial, StateId)):
@@ -146,8 +170,16 @@ class Transducer:
             and all(isinstance(x, bool) for x in self.terminal)
         ):
             raise RuntimeError("self.terminal must be a list of bools")
-        elif not (self.label is None or isinstance(self.label, str)):
-            raise RuntimeError("self.label must be None or a str")
+        elif not (
+            self.label is None
+            or (
+                isinstance(self.label, list)
+                and all(isinstance(x, str) for x in self.label)
+            )
+        ):
+            raise RuntimeError(
+                f"self.label must be None or a List[str] not {type(self.label)}"
+            )
         elif len(self.states) != len(self.terminal):
             raise RuntimeError(
                 "self.states and self.terminal must have equal length"
@@ -376,6 +408,7 @@ def transducer_induced_subtransducer(
     the collection.
     TODO: Better description, maybe a reference?
     """
+    transducer = transducer.copy()
     state_id: StateId
     included: List[bool] = [False for _ in transducer.states]
     for state_id in state_ids:
@@ -455,18 +488,22 @@ def transducer_isomorphism(
     Two transducers are _isomorphic_ if there exists a bijection between states
     that also preserves transitions and transition outputs.
     """
-    iso: List[Optional[StateId]]
 
-    if len(transducer1.states) == len(transducer2.states):
+    if len(transducer_connected_states(transducer1)) != len(transducer1.states):
+        raise RuntimeError("the 1st argument (a transducer) must be connected")
+    elif len(transducer_connected_states(transducer2)) != len(
+        transducer2.states
+    ):
+        raise RuntimeError("the 2nd argument (a transducer) must be connected")
+
+    if len(transducer1.states) != len(transducer2.states):
         return False
-
-    if len(transducer1.states) == 0:
+    elif len(transducer1.states) == 0:
+        # if transducer1 and transducer2 are trim and have no states, then they
+        # are both the empty transducer and we can return True
         return True
 
-    if transducer1.initial is None or transducer2.initial is None:
-        return False
-
-    iso = [None for _ in transducer1.states]
+    iso: List[Optional[StateId]] = [None for _ in transducer1.states]
 
     iso[transducer1.initial] = transducer2.initial
 
@@ -481,6 +518,12 @@ def transducer_isomorphism(
             if child1 is not None:
                 if child2 is None:
                     return False
+                if (
+                    state1.next_letter[input_letter]
+                    != state2.next_letter[input_letter]
+                ):
+                    return False
+
                 if (
                     iso[child1.state_id] is not None
                     and iso[child1.state_id] != child2.state_id

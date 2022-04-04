@@ -60,13 +60,13 @@ def suff_ftol(
     """Return the suffix and last to occur first letter of a word."""
     _validate_output_word(word)
     suff, ftol = pref_ltof(list(reversed(word)))
-    return list(reversed(suff)), ftol
+    return list(reversed(suff)), ftol if suff is not None else (None, None)
 
 
 def word_function(
     word: OutputWord,
 ) -> Callable[[InputWord], Optional[OutputWord]]:
-    """Given a word w return return its associated function f_w."""
+    """Given a word w return its associated function f_w."""
 
     def f_w(input_word: InputWord) -> Optional[OutputWord]:
         result: OutputWord
@@ -77,7 +77,7 @@ def word_function(
         current_part = word
 
         for input_letter in input_word:
-            if current_part is None:
+            if current_part is None or len(current_part) == 0:
                 return None
             if input_letter == 0:
                 current_part, output_letter = pref_ltof(current_part)
