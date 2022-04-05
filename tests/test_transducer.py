@@ -5,6 +5,7 @@ from typing import List
 
 import pytest
 from freebandlib.transducer import (
+    StateId,
     Transducer,
     TransducerState,
     interval_transducer,
@@ -20,10 +21,7 @@ from freebandlib.transducer import (
 from freebandlib.words import (
     InputLetter,
     OutputWord,
-    StateId,
     cont,
-    pref_ltof,
-    suff_ftol,
     word_function,
 )
 
@@ -123,7 +121,7 @@ def random_transducer(
 
     state: TransducerState
     letter: InputLetter
-    initial_id: StateId = states[0]
+    initial_id: StateId = 0
     for state_id, state in enumerate(states):
         for letter in [0, 1]:
             if random() < edge_prob:

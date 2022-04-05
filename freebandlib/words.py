@@ -5,27 +5,18 @@ TODO: writeup
 """
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple, Set, Callable
 
 InputLetter = int
 OutputLetter = int
 OutputWord = List[OutputLetter]
 InputWord = List[InputLetter]
-# Each transducer state is assigned an identifier. These are required to be
-# non-negative integers.
-StateId = int
-# Utility types for state transitions. Note that TransducerState
-# is defined below, but this is fine due to forward type declarations.
-TransducerState = None
-NextState = List[Optional[TransducerState]]
-NextStateId = List[Optional[StateId]]
-NextLetter = List[Optional[OutputLetter]]
 
 
 def _validate_output_word(word: OutputWord) -> None:
     if not isinstance(word, list):
         raise TypeError("the argument must be a list")
-    elif not all(lambda x: isinstance(x, int) for x in word):
+    if not all(lambda x: isinstance(x, int) for x in word):
         raise TypeError("the argument must be a list of integers")
 
 
@@ -38,7 +29,6 @@ def pref_ltof(
     word: OutputWord,
 ) -> Tuple[Optional[OutputWord], Optional[OutputLetter]]:
     """Return the prefix and first to occur last letter of a word."""
-
     _validate_output_word(word)
 
     k = len(cont(word))
@@ -60,7 +50,7 @@ def suff_ftol(
     """Return the suffix and last to occur first letter of a word."""
     _validate_output_word(word)
     suff, ftol = pref_ltof(list(reversed(word)))
-    return list(reversed(suff)), ftol if suff is not None else (None, None)
+    return (list(reversed(suff)), ftol) if suff is not None else (None, None)
 
 
 def word_function(
@@ -96,7 +86,12 @@ def word_function(
 
 
 def compute_right(k: int, w: OutputWord) -> List[Optional[int]]:
-    """ """
+    """Hello.
+
+    Parameters
+    ----------
+    a : int
+    """
     curr_cont: List[int]
     curr_k: int
     right_k: List[Optional[int]]

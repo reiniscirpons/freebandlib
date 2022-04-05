@@ -19,7 +19,7 @@ TODO: Finish
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Set
 
 from freebandlib.digraph import (
     DigraphAdjacencyList,
@@ -28,13 +28,20 @@ from freebandlib.digraph import (
     digraph_topological_order,
 )
 from freebandlib.words import (
-    StateId,
+    InputLetter,
+    InputWord,
+    OutputLetter,
+    OutputWord,
     compute_left,
     compute_right,
     cont,
     pref_ltof,
     suff_ftol,
 )
+
+# Each transducer state is assigned an identifier. These are required to be
+# non-negative integers.
+StateId = int
 
 
 class TransducerState:
@@ -78,6 +85,12 @@ class TransducerState:
             state.state_id if state is not None else None
             for state in self.next_state
         ]
+
+
+# Utility types for state transitions.
+NextState = List[Optional[TransducerState]]
+NextStateId = List[Optional[StateId]]
+NextLetter = List[Optional[OutputLetter]]
 
 
 class Transducer:
@@ -152,25 +165,25 @@ class Transducer:
     def validate(self):
         if not (self.initial is None or isinstance(self.initial, StateId)):
             raise RuntimeError("self.initial must be None or a StateId")
-        elif self.initial is not None and (
+        if self.initial is not None and (
             self.initial >= len(self.states) or self.initial < 0
         ):
             raise RuntimeError(
                 f"self.initial must be in the range [0, {len(self.states)}"
             )
-        elif not (
+        if not (
             isinstance(self.states, List)
             and all(isinstance(x, TransducerState) for x in self.states)
         ):
             raise RuntimeError(
                 "self.states must be a list of TransducerState objects"
             )
-        elif not (
+        if not (
             isinstance(self.terminal, List)
             and all(isinstance(x, bool) for x in self.terminal)
         ):
             raise RuntimeError("self.terminal must be a list of bools")
-        elif not (
+        if not (
             self.label is None
             or (
                 isinstance(self.label, list)
@@ -180,11 +193,11 @@ class Transducer:
             raise RuntimeError(
                 f"self.label must be None or a List[str] not {type(self.label)}"
             )
-        elif len(self.states) != len(self.terminal):
+        if len(self.states) != len(self.terminal):
             raise RuntimeError(
                 "self.states and self.terminal must have equal length"
             )
-        elif self.label is not None and len(self.states) != len(self.label):
+        if self.label is not None and len(self.states) != len(self.label):
             raise RuntimeError(
                 "self.states and self.label must have equal length"
             )
@@ -488,23 +501,23 @@ def transducer_isomorphism(
     Two transducers are _isomorphic_ if there exists a bijection between states
     that also preserves transitions and transition outputs.
     """
-
     if len(transducer_connected_states(transducer1)) != len(transducer1.states):
         raise RuntimeError("the 1st argument (a transducer) must be connected")
-    elif len(transducer_connected_states(transducer2)) != len(
-        transducer2.states
-    ):
+    if len(transducer_connected_states(transducer2)) != len(transducer2.states):
         raise RuntimeError("the 2nd argument (a transducer) must be connected")
 
     if len(transducer1.states) != len(transducer2.states):
         return False
-    elif len(transducer1.states) == 0:
+    if len(transducer1.states) == 0:
         # if transducer1 and transducer2 are trim and have no states, then they
         # are both the empty transducer and we can return True
         return True
 
     iso: List[Optional[StateId]] = [None for _ in transducer1.states]
 
+    # A trim transducer without an initial state is empty, so would have
+    # returned above.
+    assert transducer1.initial is not None
     iso[transducer1.initial] = transducer2.initial
 
     que = [transducer1.states[transducer1.initial]]
@@ -536,7 +549,7 @@ def transducer_isomorphism(
             elif child2 is not None:
                 return False
 
-    for state_id1, state_id2 in enumerate(iso):
+    for state_id2 in iso:
         if state_id2 is None:
             return False
 
@@ -800,14 +813,13 @@ def transducer_precompute_q(
         initial state of `transducer` and there is a transition from `q_i`
         into `q_{i+1}` labelled by input letter `letter`.
     """
-
     if transducer.initial is None:
         return []
 
     state: Optional[TransducerState] = transducer.states[transducer.initial]
-    result: List[TransducerState] = []
+    result: List[StateId] = []
     while state is not None:
-        result.append(state)
+        result.append(state.state_id)
         state = state.next_state[letter]
     return result
 
@@ -826,7 +838,7 @@ def transducer_cont(transducer: Transducer) -> Set[OutputLetter]:
     q = transducer_precompute_q(transducer, 0)
     content = set()
     for state_id in q:
-        state = transducer.state[state_id]
+        state = transducer.states[state_id]
         if state.next_letter[0] is not None:
             content.add(state.next_letter[0])
     return content
