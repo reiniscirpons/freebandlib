@@ -213,7 +213,7 @@ class Transducer:
 
     def add_state(
         self,
-        next_state_id: List[StateId],
+        next_state_id: List[Optional[StateId]],
         next_letter: List[Optional[OutputLetter]],
         is_terminal: bool,
     ) -> TransducerState:
@@ -239,7 +239,10 @@ class Transducer:
         self.states.append(
             TransducerState(
                 len(self.states),
-                [self.states[i] for i in next_state_id],
+                [
+                    self.states[i] if i is not None else None
+                    for i in next_state_id
+                ],
                 next_letter,
             )
         )
