@@ -1,4 +1,18 @@
-clean: 
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2022, Reinis Cirpons + J. D. Mitchell
+#
+# Distributed under the terms of the GPL license version 3.
+#
+# The full license is in the file LICENSE, distributed with this software.
+
+doc: 
+	cd docs && make html
+
+clean-doc:
+	rm -rf docs/_build
+
+clean: clean-doc
 	rm -rf *.egg-info 
 	rm -rf docs/build
 	rm -rf build/
