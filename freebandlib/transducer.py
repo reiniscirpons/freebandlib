@@ -44,55 +44,6 @@ from freebandlib.words import (
 StateId = int
 
 
-class TransducerState:
-    """A datastructure representing a transducer state.
-
-    Parameters
-    ----------
-    state_id: StateId
-        The identifier associated to this state
-    next_state: NextState
-        The state transition function
-    next_letter: List[letter]
-        The letter transition function
-
-    Notes
-    -----
-    We assume that our transducers are synchronous and deterministic, so that
-    no epsilon transitions are permitted, and each input letter leads to
-    exactly one state, and outputs exactly one output letter.
-
-    Since the input alphabet is always :math:`{0, 1}`, we opt to store our
-    state transition and letter transition functions as lists, where the
-    :math:`i`-th entry corresponds to the transition upon reading :math:`i` (if
-    this transition is defined and `None` otherwise).
-    """
-
-    def __init__(
-        self, state_id: StateId, next_state: NextState, next_letter: NextLetter
-    ):
-        self.state_id = state_id
-        self.next_state = next_state
-        self.next_letter = next_letter
-
-    def __repr__(self):
-        """Generate a textual representation of the state."""
-        return repr((self.state_id, self.next_state_id(), self.next_letter))
-
-    def next_state_id(self) -> NextStateId:
-        """Return the next state function in terms of state ids."""
-        return [
-            state.state_id if state is not None else None
-            for state in self.next_state
-        ]
-
-
-# Utility types for state transitions.
-NextState = List[Optional[TransducerState]]
-NextStateId = List[Optional[StateId]]
-NextLetter = List[Optional[OutputLetter]]
-
-
 class Transducer:
     """A datastructure representing a transducer.
 
@@ -101,8 +52,10 @@ class Transducer:
     initial: Optional[StateId]
         The the position of the initial state in the `states` list.
         Can be `None` to support empty transducer.
-    states: List[TransducerState]
-        A list containing all the transducer states.
+    next_state: List[List[Optional[StateId]]]
+        The state transition function
+    next_letter: List[List[Optional[Letter]]]
+        The letter transition function
     terminal: List[bool]
         A list indicating if the `i`-th state is terminal or not.
 
@@ -112,52 +65,44 @@ class Transducer:
         A list of node labels. These are optional and only serve a purpose for
         debugging or visualising.
 
-    See Also
-    --------
-    TransducerState: The constituent states of the transducer.
-
     Notes
     -----
-    As before, we assume that our transducers are synchronous and
-    deterministic. In addition we assume that our transducers are acyclic. This
-    implies the function they realize have a finite domain but is a stronger
-    condition.
+    We assume that our transducers are synchronous, deterministic and acyclic,
+    so that no epsilon transitions are permitted, each input letter leads to
+    exactly one state, and outputs exactly one output letter, and furthermore
+    no directed cycle can occur which implies the function they realize have a
+    finite domain but is a stronger condition.
 
-    We implement transducers as a collection of states along with a pointer to
-    the initial states and a boolean list indicating if a state is terminal or
-    not. We require that each state of a transducer has a unique state id
-    within the transducer. Furthermore in implementation, the state id
-    corresponds to the states position in the state collection.
+    Since the input alphabet is always :math:`{0, 1}`, we opt to store our
+    state transition and letter transition functions as lists, where the
+    :math:`i`-th entry corresponds to the transition upon reading :math:`i` (if
+    this transition is defined and `None` otherwise).
     """
 
     def __init__(
         self,
         initial: Optional[StateId],
-        states: List[TransducerState],
+        next_state: List[List[Optional[StateId]]],
+        next_letter: List[List[Optional[StateId]]],
         terminal: List[bool],
         label: List[str] = None,
     ):
         self.initial = initial
-        self.states = states
+        self.next_letter = next_letter
+        self.next_state = next_state
         self.terminal = terminal
         self.label = label
         self.validate()  # TODO(RC) not sure if you want this here!
-        self.normalize()
+
+    @property
+    def nr_states(self) -> int:
+        return len(self.next_letter)
 
     def copy(self) -> Transducer:
-        states = [
-            TransducerState(x.state_id, [None] * 2, x.next_letter[::])
-            for x in self.states
-        ]
-        for i, old_state in enumerate(self.states):
-            states[i].next_state = [
-                states[x.state_id] if x is not None else None
-                for x in old_state.next_state
-            ]
-
         return Transducer(
             self.initial,
-            states,
+            self.next_state[::],
+            self.next_letter[::],
             self.terminal[::],
             self.label[::] if self.label is not None else None,
         )
@@ -166,17 +111,40 @@ class Transducer:
         if not (self.initial is None or isinstance(self.initial, StateId)):
             raise RuntimeError("self.initial must be None or a StateId")
         if self.initial is not None and (
-            self.initial >= len(self.states) or self.initial < 0
+            self.initial >= self.nr_states or self.initial < 0
         ):
             raise RuntimeError(
-                f"self.initial must be in the range [0, {len(self.states)}"
+                f"self.initial must be in the range [0, {self.nr_states}"
             )
         if not (
-            isinstance(self.states, List)
-            and all(isinstance(x, TransducerState) for x in self.states)
+            isinstance(self.next_state, List)
+            and all(
+                x is None or isinstance(x, StateId) for x in self.next_state
+            )
         ):
             raise RuntimeError(
-                "self.states must be a list of TransducerState objects"
+                "self.next_state must be a list of optional StateId objects"
+            )
+        if not (
+            isinstance(self.next_letter, List)
+            and all(
+                x is None or isinstance(x, OutputLetter)
+                for x in self.next_letter
+            )
+        ):
+            raise RuntimeError(
+                "self.next_letter must be a list of optional OutputLetter objects"
+            )
+        if not (
+            len(self.next_state) == len(self.next_letter)
+            and all(
+                (x is None and y is None)
+                or (isinstance(x, StateId) and isinstance(y, OutputLetter))
+                for x, y in zip(self.next_state, self.next_letter)
+            )
+        ):
+            raise RuntimeError(
+                "self.next_state and self.next_letter must have the same length and be defined on the same inputs"
             )
         if not (
             isinstance(self.terminal, List)
@@ -193,30 +161,25 @@ class Transducer:
             raise RuntimeError(
                 f"self.label must be None or a List[str] not {type(self.label)}"
             )
-        if len(self.states) != len(self.terminal):
+        if self.nr_states != len(self.terminal):
+            raise RuntimeError("self.terminal must be defined for all states")
+        if self.label is not None and self.nr_states != len(self.label):
             raise RuntimeError(
-                "self.states and self.terminal must have equal length"
-            )
-        if self.label is not None and len(self.states) != len(self.label):
-            raise RuntimeError(
-                "self.states and self.label must have equal length"
+                "if defined, self.label must be defined on all states"
             )
 
     def __repr__(self):
         """Generate a textual representation of the transducer."""
-        return repr((self.initial, self.states, self.terminal))
-
-    def normalize(self):
-        """Make state ids correspond to position is state list."""
-        for i, state in enumerate(self.states):
-            state.state_id = i
+        return repr(
+            (self.initial, self.next_state, self.next_letter, self.terminal)
+        )
 
     def add_state(
         self,
-        next_state_id: List[Optional[StateId]],
+        next_state: List[Optional[StateId]],
         next_letter: List[Optional[OutputLetter]],
         is_terminal: bool,
-    ) -> TransducerState:
+    ) -> StateId:
         """Add a state to the transducer.
 
         This method modifies the transducer to have a new state with properties
@@ -233,21 +196,13 @@ class Transducer:
 
         Returns
         -------
-        TransducerState
+        StateId
             The state that was added to the transducer.
         """
-        self.states.append(
-            TransducerState(
-                len(self.states),
-                [
-                    self.states[i] if i is not None else None
-                    for i in next_state_id
-                ],
-                next_letter,
-            )
-        )
+        self.next_state.append(next_state)
+        self.next_letter.append(next_letter)
         self.terminal.append(is_terminal)
-        return self.states[-1]
+        return self.nr_states - 1
 
     def traverse(self, word: InputWord) -> Optional[OutputWord]:
         """Traverse an input word through the trasducer and return its output.
@@ -269,18 +224,19 @@ class Transducer:
         """
         if self.initial is None:
             return None
-        state: Optional[TransducerState] = self.states[self.initial]
 
+        state: Optional[StateId] = self.initial
         result: OutputWord = []
+        result_letter: Optional[OutputLetter]
         for letter in word:
             assert state is not None
-            result_letter: Optional[OutputLetter] = state.next_letter[letter]
+            result_letter = self.next_letter[state][letter]
             if result_letter is None:
                 return None
             result.append(result_letter)
-            state = state.next_state[letter]
+            state = self.next_state[state][letter]
 
-        if state is None or not self.terminal[state.state_id]:
+        if state is None or not self.terminal[state]:
             return None
 
         return result
@@ -299,17 +255,14 @@ class Transducer:
         given by states and there is an edge from one vertex to another if
         there is a state transition between the corresponding states.
         """
-        state: TransducerState
-        state_id: Optional[StateId]
+        state: StateId
+        child: Optional[StateId]
 
-        result: DigraphAdjacencyList = [[] for _ in self.states]
-        for state in self.states:
-            for state_id in state.next_state_id():
-                if (
-                    state_id is not None
-                    and state_id not in result[state.state_id]
-                ):
-                    result[state.state_id].append(state_id)
+        result: DigraphAdjacencyList = [[] for _ in range(self.nr_states)]
+        for state in range(self.nr_states):
+            for child in self.next_state[state]:
+                if child is not None and child not in result[state]:
+                    result[state].append(child)
 
         return result
 
@@ -343,8 +296,6 @@ def transducer_connected_states(transducer: Transducer) -> List[StateId]:
     if transducer.initial is None:
         return []
 
-    nr_states: int = len(transducer.states)
-
     digraph: DigraphAdjacencyList = transducer.underlying_digraph()
     is_accessible: List[bool] = digraph_is_reachable(
         digraph, [transducer.initial]
@@ -352,17 +303,17 @@ def transducer_connected_states(transducer: Transducer) -> List[StateId]:
 
     digraph_rev: DigraphAdjacencyList = digraph_reverse(digraph)
     terminal_states: List[StateId] = [
-        state_id
-        for state_id in range(nr_states)
-        if transducer.terminal[state_id]
+        state
+        for state in range(transducer.nr_states)
+        if transducer.terminal[state]
     ]
     is_coaccessible = digraph_is_reachable(digraph_rev, terminal_states)
 
     result: List[StateId] = [
-        state_id
-        for state_id in range(nr_states)
-        if is_accessible[state_id] and is_coaccessible[state_id]
-    ]  # noqa: W503
+        state
+        for state in range(transducer.nr_states)
+        if is_accessible[state] and is_coaccessible[state]
+    ]
     return result
 
 
@@ -398,7 +349,7 @@ def transducer_topological_order(
 
 
 def transducer_induced_subtransducer(
-    transducer: Transducer, state_ids: List[StateId]
+    transducer: Transducer, states: List[StateId]
 ) -> Transducer:
     """Return the subtransducer induced by the given states.
 
@@ -408,9 +359,9 @@ def transducer_induced_subtransducer(
     ----------
     transducer: Transducer
         The base transducer.
-    state_ids: List[StateId]
+    states: List[StateId]
         A list of states of the given transducer that will be used to generate
-        the induced subtransducer. The states are given by their ids.
+        the induced subtransducer.
 
     Returns
     -------
@@ -424,35 +375,44 @@ def transducer_induced_subtransducer(
     the collection.
     TODO: Better description, maybe a reference?
     """
-    transducer = transducer.copy()
-    state_id: StateId
-    included: List[bool] = [False for _ in transducer.states]
-    for state_id in state_ids:
-        included[state_id] = True
 
-    state: TransducerState
-    letter: InputLetter
-    child: Optional[TransducerState]
-    states: List[TransducerState] = [
-        transducer.states[state_id] for state_id in state_ids
+    state: StateId
+    included: List[bool] = [False for _ in range(transducer.nr_states)]
+    for state in states:
+        included[state] = True
+
+    induced_subtransducer = Transducer(None, [], [], [])
+    state_lookup: List[Optional[StateId]] = [
+        None for _ in range(transducer.nr_states)
     ]
     for state in states:
-        for letter, child in enumerate(state.next_state):
-            if child is not None and not included[child.state_id]:
-                state.next_state[letter] = None
-                state.next_letter[letter] = None
+        next_state = [
+            child if child is not None and included[child] else None
+            for child in transducer.next_state[state]
+        ]
+        next_letter = [
+            letter if child is not None and included[child] else None
+            for child, letter in zip(
+                transducer.next_state[state], transducer.next_letter[state]
+            )
+        ]
+        state_lookup[state] = induced_subtransducer.add_state(
+            next_state, next_letter, transducer.terminal[state]
+        )
 
-    terminal: List[bool] = [
-        transducer.terminal[state_id] for state_id in state_ids
-    ]
+    for state in range(induced_subtransducer.nr_states):
+        for letter, child in enumerate(induced_subtransducer.next_state[state]):
+            if child is not None:
+                assert state_lookup[child] is not None
+                induced_subtransducer.next_state[state][letter] = state_lookup[
+                    child
+                ]
 
-    initial: Optional[StateId]
     if transducer.initial is not None and included[transducer.initial]:
-        initial = state_ids.index(transducer.initial)
-    else:
-        initial = None
+        assert state_lookup[transducer.initial] is not None
+        induced_subtransducer.initial = state_lookup[transducer.initial]
 
-    return Transducer(initial, states, terminal)
+    return induced_subtransducer
 
 
 def transducer_trim(transducer: Transducer) -> Transducer:
@@ -504,56 +464,51 @@ def transducer_isomorphism(
     Two transducers are _isomorphic_ if there exists a bijection between states
     that also preserves transitions and transition outputs.
     """
-    if len(transducer_connected_states(transducer1)) != len(transducer1.states):
+    if len(transducer_connected_states(transducer1)) != transducer1.nr_states:
         raise RuntimeError("the 1st argument (a transducer) must be connected")
-    if len(transducer_connected_states(transducer2)) != len(transducer2.states):
+    if len(transducer_connected_states(transducer2)) != transducer2.nr_states:
         raise RuntimeError("the 2nd argument (a transducer) must be connected")
 
-    if len(transducer1.states) != len(transducer2.states):
+    if transducer1.nr_states != transducer2.nr_states:
         return False
-    if len(transducer1.states) == 0:
+    if transducer1.nr_states == 0:
         # if transducer1 and transducer2 are trim and have no states, then they
         # are both the empty transducer and we can return True
         return True
 
-    iso: List[Optional[StateId]] = [None for _ in transducer1.states]
+    iso: List[Optional[StateId]] = [None for _ in range(transducer1.nr_states)]
 
     # A trim transducer without an initial state is empty, so would have
     # returned above.
     assert transducer1.initial is not None
     iso[transducer1.initial] = transducer2.initial
 
-    que = [transducer1.states[transducer1.initial]]
+    que = [transducer1.initial]
     while len(que) > 0:
         state1 = que.pop()
-        state_id2 = iso[state1.state_id]
-        assert state_id2 is not None
-        state2 = transducer2.states[state_id2]
-        for input_letter, child1 in enumerate(state1.next_state):
-            child2 = state2.next_state[input_letter]
+        state2 = iso[state1]
+        assert state2 is not None
+        for letter, child1 in enumerate(transducer1.next_state[state1]):
+            child2 = transducer2.next_state[state2][letter]
             if child1 is not None:
                 if child2 is None:
                     return False
                 if (
-                    state1.next_letter[input_letter]
-                    != state2.next_letter[input_letter]
+                    transducer1.next_letter[state1][letter]
+                    != transducer2.next_letter[state2][letter]
                 ):
                     return False
 
-                if (
-                    iso[child1.state_id] is not None
-                    and iso[child1.state_id] != child2.state_id
-                ):
+                if iso[child1] is not None and iso[child1] != child2:
                     return False
-                if iso[child1.state_id] is None:
-                    iso[child1.state_id] = child2.state_id
+                if iso[child1] is None:
+                    iso[child1] = child2
                     que.append(child1)
-
             elif child2 is not None:
                 return False
 
-    for state_id2 in iso:
-        if state_id2 is None:
+    for state in iso:
+        if state is None:
             return False
 
     return True
@@ -602,53 +557,42 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
         StateId,
     ]
 
-    trim_transducer: Transducer = transducer_trim(transducer)
+    trim_transducer = transducer_trim(transducer)
 
     if trim_transducer.initial is None:
-        return Transducer(None, [], [])
+        return Transducer(None, [], [], [])
 
-    nr_states: int = len(trim_transducer.states)
-    topo_order: Optional[List[StateId]] = transducer_topological_order(
-        trim_transducer
-    )
+    topo_order = transducer_topological_order(trim_transducer)
     # The following assertion will always pass as our transducers are assumed
     # to be acyclic
     assert topo_order is not None
 
-    state: TransducerState
-    state_id: StateId
-    child_id: StateId
     # Representative will associate to each state_id a unique state_id
     # of a state that is equivalent to it.
-    representative: List[StateId] = list(range(nr_states))
+    representative: List[StateId] = list(range(trim_transducer.nr_states))
     # We use a hash dictionary here which is not strictly speaking linear time,
     # however to achieve this a radix sort can be used instead as per Revuz. We
     # chose a hash dict for simplicity of implementation and good practical
     # performance.
     state_tuple_to_representative = {}
-    for state_id in reversed(topo_order):
-        state = trim_transducer.states[state_id]
+    for state in reversed(topo_order):
         state_tuple = (
             tuple(
-                representative[child_id] if child_id is not None else None
-                for child_id in state.next_state_id()
+                representative[child] if child is not None else None
+                for child in trim_transducer.next_state[state]
             ),
-            tuple(state.next_letter),
+            tuple(trim_transducer.next_letter[state]),
         )
         if state_tuple not in state_tuple_to_representative:
-            state_tuple_to_representative[state_tuple] = state_id
+            state_tuple_to_representative[state_tuple] = state
         else:
-            representative[state_id] = state_tuple_to_representative[
-                state_tuple
-            ]
+            representative[state] = state_tuple_to_representative[state_tuple]
 
-    child: Optional[TransducerState]
-    letter: InputLetter
-    for state_id, state in enumerate(trim_transducer.states):
-        for letter, child in enumerate(state.next_state):
+    for state in range(trim_transducer.nr_states):
+        for letter, child in enumerate(trim_transducer.next_state[state]):
             if child is not None:
-                state.next_state[letter] = trim_transducer.states[
-                    representative[child.state_id]
+                trim_transducer.next_state[state][letter] = representative[
+                    child
                 ]
 
     return transducer_trim(trim_transducer)
@@ -670,13 +614,9 @@ def treelike_transducer(word: OutputWord) -> Transducer:
     ftol: Optional[OutputLetter]
     transducer_pref: Transducer
     transducer_suff: Transducer
-    states: List[TransducerState]
-    terminal: List[bool]
 
     if len(word) == 0:
-        transducer = Transducer(
-            0, [TransducerState(0, [None, None], [None, None])], [True]
-        )
+        transducer = Transducer(0, [[None, None]], [[None, None]], [True])
         return transducer
 
     pref, ltof = pref_ltof(word)
@@ -685,25 +625,35 @@ def treelike_transducer(word: OutputWord) -> Transducer:
     assert suff is not None
     transducer_pref = treelike_transducer(pref)
     transducer_suff = treelike_transducer(suff)
+
+    offset_pref = 1
+    offset_suff = 1 + transducer_pref.nr_states
+    transducer = Transducer(None, [], [], [])
     assert transducer_pref.initial is not None
     assert transducer_suff.initial is not None
+    transducer.add_state(
+        [
+            offset_pref + transducer_pref.initial,
+            offset_suff + transducer_suff.initial,
+        ],
+        [ltof, ftol],
+        False,
+    )
 
-    states = [
-        TransducerState(
-            0,
-            [
-                transducer_pref.states[transducer_pref.initial],
-                transducer_suff.states[transducer_suff.initial],
-            ],
-            [ltof, ftol],
-        )
-    ]
-    states.extend(transducer_pref.states)
-    states.extend(transducer_suff.states)
-    terminal = [False]
-    terminal.extend(transducer_pref.terminal)
-    terminal.extend(transducer_suff.terminal)
-    transducer = Transducer(0, states, terminal)
+    for transducer_atob, offset_atob in [
+        (transducer_pref, offset_pref),
+        (transducer_suff, offset_suff),
+    ]:
+        for state in range(transducer_atob.nr_states):
+            transducer.add_state(
+                [
+                    offset_atob + child if child is not None else None
+                    for child in transducer_atob.next_state[state]
+                ],
+                transducer_atob.next_letter[state],
+                transducer_atob.terminal[state],
+            )
+
     return transducer
 
 
@@ -712,7 +662,6 @@ def interval_transducer(word: OutputWord) -> Transducer:
     size_cont: int
     right: List[List[Optional[int]]]
     left: List[List[Optional[int]]]
-    states: List[TransducerState]
     interval_lookup: Dict[Tuple[int, int], StateId]
     i: Optional[int]
     j: Optional[int]
@@ -724,7 +673,7 @@ def interval_transducer(word: OutputWord) -> Transducer:
     right = [compute_right(k, word) for k in range(1, size_cont + 1)]
     left = [compute_left(k, word) for k in range(1, size_cont + 1)]
 
-    states = [TransducerState(0, [None, None], [None, None])]
+    transducer = Transducer(None, [[None, None]], [[None, None]], [True])
     # We use a hash dictionary to associate to each state representing pair
     # (i, j) the id of the state it corresponds to. This is not strictly
     # speaking linear, however a linear runtime can be achieved for example by
@@ -733,117 +682,101 @@ def interval_transducer(word: OutputWord) -> Transducer:
     for k in range(size_cont):
         for i, j in enumerate(right[k]):
             if j is not None and (i, j) not in interval_lookup:
-                interval_lookup[(i, j)] = len(states)
+                interval_lookup[(i, j)] = transducer.nr_states
                 if k == 0:
-                    states.append(
-                        TransducerState(
-                            len(states),
-                            [states[0], states[0]],
-                            [word[i], word[i]],
-                        )
-                    )
+                    transducer.add_state([0, 0], [word[i], word[i]], False)
                 else:
                     rr = right[k - 1][i]
                     ll = left[k - 1][j]
                     assert rr is not None
                     assert ll is not None
-                    states.append(
-                        TransducerState(
-                            len(states),
-                            [
-                                states[interval_lookup[(i, rr)]],
-                                states[interval_lookup[(ll, j)]],
-                            ],
-                            [word[rr + 1], word[ll - 1]],
-                        )
+                    transducer.add_state(
+                        [
+                            interval_lookup[(i, rr)],
+                            interval_lookup[(ll, j)],
+                        ],
+                        [word[rr + 1], word[ll - 1]],
+                        False,
                     )
         for j, i in enumerate(left[k]):
             if i is not None and (i, j) not in interval_lookup:
                 # TODO: Remove duplicated code
-                interval_lookup[(i, j)] = len(states)
+                interval_lookup[(i, j)] = transducer.nr_states
                 if k == 0:
-                    states.append(
-                        TransducerState(
-                            len(states),
-                            [states[0], states[0]],
-                            [word[i], word[i]],
-                        )
-                    )
+                    transducer.add_state([0, 0], [word[i], word[i]], False)
                 else:
                     rr = right[k - 1][i]
                     ll = left[k - 1][j]
                     assert rr is not None
                     assert ll is not None
-                    states.append(
-                        TransducerState(
-                            len(states),
-                            [
-                                states[interval_lookup[(i, rr)]],
-                                states[interval_lookup[(ll, j)]],
-                            ],
-                            [word[rr + 1], word[ll - 1]],
-                        )
+                    transducer.add_state(
+                        [
+                            interval_lookup[(i, rr)],
+                            interval_lookup[(ll, j)],
+                        ],
+                        [word[rr + 1], word[ll - 1]],
+                        False,
                     )
 
-    initial = interval_lookup[(0, len(word) - 1)]
-    terminal = [False for _ in range(len(states))]
-    terminal[0] = True
+    transducer.initial = interval_lookup[(0, len(word) - 1)]
 
     # Store the (i, j) state labels for debugging and visualization purposes
-    label: List[str] = [""] * len(states)
+    label: List[str] = [""] * transducer.nr_states
     for interval in interval_lookup:
         i, j = interval
         label[interval_lookup[interval]] = str((i + 1, j + 1))
     label[0] = "0"
 
-    return Transducer(initial, states, terminal, label)
+    return transducer
 
 
 def transducer_precompute_q(
-    transducer: Transducer, letter: InputLetter
+    state: Optional[StateId], letter: InputLetter, transducer: Transducer
 ) -> List[StateId]:
-    """Given a transducer and letter, repeatedly transition along the letter.
+    """Calculate all states reachable from `state` using `letter`.
 
     Parameters
     ----------
-    transducer: Transducer
+    state: Optional[StateId]
     letter: InputLetter
+    transducer: Transducer
 
     Returns
     -------
     List[StateId]
         The list of states `[q_0, q_1, q_2, ..., q_n]` where `q_0` is the
-        initial state of `transducer` and there is a transition from `q_i`
+        `state`, `q_n` is a terminal state, and there is a transition from `q_i`
         into `q_{i+1}` labelled by input letter `letter`.
     """
-    if transducer.initial is None:
+    if state is None:
         return []
-
-    state: Optional[TransducerState] = transducer.states[transducer.initial]
     result: List[StateId] = []
     while state is not None:
-        result.append(state.state_id)
-        state = state.next_state[letter]
+        result.append(state)
+        state = transducer.next_state[state][letter]
     return result
 
 
-def transducer_cont(transducer: Transducer) -> Set[OutputLetter]:
-    """Return the content of the free band element represented by `transducer`.
+def transducer_cont(
+    state: StateId, transducer: Transducer
+) -> Set[OutputLetter]:
+    """Return the content of the free band element represented by `state`.
 
     Parameters
     ----------
+    state: State
     transducer: Transducer
 
     Returns
     -------
     Set[OutputLetter]
     """
-    q = transducer_precompute_q(transducer, 0)
-    content = set()
-    for state_id in q:
-        state = transducer.states[state_id]
-        if state.next_letter[0] is not None:
-            content.add(state.next_letter[0])
+    q = transducer_precompute_q(state, 0, transducer)
+    content: Set[OutputLetter] = set()
+    for state in q:
+        letter = transducer.next_letter[state][0]
+        if letter is not None:
+            content.add(letter)
     return content
 
 

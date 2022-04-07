@@ -3,7 +3,7 @@
 TODO: Finish
 """
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from freebandlib.words import OutputLetter
 from freebandlib.transducer import (
