@@ -9,7 +9,6 @@ from freebandlib.multiply import multiply
 from freebandlib.transducer import (
     StateId,
     Transducer,
-    TransducerState,
     interval_transducer,
     minimal_transducer,
     transducer_connected_states,

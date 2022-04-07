@@ -1,13 +1,12 @@
 """ Tests for freebandlib.transducer """
 import itertools
 from random import randint, random, shuffle
-from typing import List
+from typing import List, Optional
 
 import pytest
 from freebandlib.transducer import (
     StateId,
     Transducer,
-    TransducerState,
     interval_transducer,
     minimal_transducer,
     transducer_connected_states,
@@ -20,6 +19,7 @@ from freebandlib.transducer import (
 )
 from freebandlib.words import (
     InputLetter,
+    OutputLetter,
     OutputWord,
     cont,
     word_function,
@@ -52,7 +52,7 @@ def check_transducer_topo_order(t: Transducer) -> None:
     assert top is None or isinstance(top, list)
     if top is None:
         return
-    assert len(top) == len(t.states)
+    assert len(top) == t.nr_states
     nbs = t.underlying_digraph()
     for v, nbs_v in enumerate(nbs):
         for w in nbs_v:
@@ -62,8 +62,8 @@ def check_transducer_topo_order(t: Transducer) -> None:
 def check_transducer_trim(w: OutputWord, t: Transducer) -> None:
     trimmed_t = transducer_trim(t)
     check_transducers_realize_same(w, t, trimmed_t)
-    assert len(transducer_connected_states(trimmed_t)) == len(trimmed_t.states)
-    if len(t.states) == len(trimmed_t.states):
+    assert len(transducer_connected_states(trimmed_t)) == trimmed_t.nr_states
+    if t.nr_states == trimmed_t.nr_states:
         assert transducer_isomorphism(t, trimmed_t)
 
     double_trimmed_t = transducer_trim(trimmed_t)
@@ -106,49 +106,36 @@ def random_transducer(
         A randomly generated transducer with the specified parameters.
     """
 
+    transducer = Transducer(None, [], [], [])
+
     if nr_states <= 0:
-        return Transducer(None, [], [])
+        return transducer
 
-    state_ids: List[StateId] = list(range(-10 * nr_states, 10 * nr_states))
-    shuffle(state_ids)
-    state_ids = state_ids[:nr_states]
+    states = list(range(nr_states))
+    shuffle(states)
 
-    state_id: StateId
-    states: List[TransducerState] = [
-        TransducerState(state_id, [None, None], [None, None])
-        for state_id in state_ids
-    ]
-
-    state: TransducerState
-    letter: InputLetter
-    initial_id: StateId = 0
-    for state_id, state in enumerate(states):
+    for state in states:
+        next_state: List[Optional[StateId]] = [None, None]
+        next_letter: List[Optional[OutputLetter]] = [None, None]
+        terminal = False
         for letter in [0, 1]:
             if random() < edge_prob:
-                if acyclic and state_id != nr_states - 1:
-                    state.next_letter[letter] = randint(0, output_alphabet - 1)
-                    state.next_state[letter] = states[
-                        randint(state_id + 1, nr_states - 1)
+                if acyclic and state != nr_states - 1:
+                    next_letter[letter] = randint(0, output_alphabet - 1)
+                    next_state[letter] = states[
+                        randint(state + 1, nr_states - 1)
                     ]
                 elif not acyclic:
-                    state.next_letter[letter] = randint(0, output_alphabet - 1)
-                    state.next_state[letter] = states[randint(0, nr_states - 1)]
-    shuffle(states)
-    for state_id, state in enumerate(states):
-        if state.state_id == initial_id:
-            initial_id = state_id
-            break
-
-    terminal: List[bool] = []
-    for state in states:
+                    next_letter[letter] = randint(0, output_alphabet - 1)
+                    next_state[letter] = states[randint(0, nr_states - 1)]
         if random() < terminal_prob:
-            terminal.append(True)
-        else:
-            terminal.append(False)
+            terminal = True
+        # This might add an invalid state stha
+        transducer.add_state(next_state, next_letter, terminal)
 
     if random() < initial_prob:
-        return Transducer(initial_id, states, terminal)
-    return Transducer(None, states, terminal)
+        transducer.initial = states[0]
+    return transducer
 
 
 ########################################################################
@@ -158,7 +145,7 @@ def random_transducer(
 
 def test_transducer_validate():
     try:
-        t = Transducer(None, [], [])
+        t = Transducer(None, [], [], [])
     except RuntimeError as e:
         assert False, f'empty transducer raised the exception "{e}"'
     assert transducer_connected_states(t) == []
@@ -166,41 +153,39 @@ def test_transducer_validate():
     assert t.traverse([]) is None
 
     with pytest.raises(RuntimeError):
-        t = Transducer(0, [None], [False])
+        t = Transducer(0, [None], [None], [False])
 
     with pytest.raises(RuntimeError):
-        t = Transducer(True, [None], [False])
+        t = Transducer(True, [None], [None], [False])
     with pytest.raises(RuntimeError):
-        t = Transducer("a", [None], [False])
+        t = Transducer("a", [None], [None], [False])
 
     with pytest.raises(RuntimeError):
-        t = Transducer(None, [], None)
+        t = Transducer(None, [], [], None)
 
     with pytest.raises(RuntimeError):
         t = Transducer(None, [], [], [None])
 
     with pytest.raises(RuntimeError):
-        t = Transducer(None, [], [True])
+        t = Transducer(None, [], [], [True])
 
     with pytest.raises(RuntimeError):
-        t = Transducer(None, [], [], ["a"])
+        t = Transducer(None, [], [], [], ["a"])
 
 
 def test_transducer_repr():
     t = treelike_transducer([0, 1, 0, 2])
     assert (
         t.__repr__()
-        == "(0, [(0, [1, 8], [2, 1]), (1, [2, 5], [1, 1]), (2, [3, 4], [0, 0]), (3, [None, None], [None, None]), (4, [None, None], [None, None]), (5, [6, 7], [0, 0]), (6, [None, None], [None, None]), (7, [None, None], [None, None]), (8, [9, 12], [2, 0]), (9, [10, 11], [0, 0]), (10, [None, None], [None, None]), (11, [None, None], [None, None]), (12, [13, 14], [2, 2]), (13, [None, None], [None, None]), (14, [None, None], [None, None])], [False, False, False, True, True, False, True, True, False, False, True, True, False, True, True])"
+        == "(0, [[1, 8], [2, 5], [3, 4], [None, None], [None, None], [6, 7], [None, None], [None, None], [9, 12], [10, 11], [None, None], [None, None], [13, 14], [None, None], [None, None]], [[2, 1], [1, 1], [0, 0], [None, None], [None, None], [0, 0], [None, None], [None, None], [2, 0], [0, 0], [None, None], [None, None], [2, 2], [None, None], [None, None]], [False, False, False, True, True, False, True, True, False, False, True, True, False, True, True])"
     )
 
 
 def test_treelike_transducer_abac():
     t = treelike_transducer([0, 1, 0, 2])
 
-    assert len(t.states) == 15
-    assert isinstance(t.states[0], TransducerState)
-    assert t.states[0].__repr__() == "(0, [1, 8], [2, 1])"
-    assert t.states[0].next_state_id() == [1, 8]
+    assert t.nr_states == 15
+    assert t.next_state[0] == [1, 8]
     assert t.traverse([0, 0]) is None
     assert t.traverse([0, 0, 0, 0]) is None
     assert t.traverse([0, 0, 0]) == [2, 1, 0]
@@ -250,7 +235,7 @@ def test_treelike_transducer_abac():
 def test_interval_transducer_abac():
     w = [0, 1, 0, 2]
     t = interval_transducer(w)
-    assert len(t.states) == 11
+    assert t.nr_states == 11
     assert transducer_connected_states(t) == [0, 1, 3, 4, 5, 7, 9]
     assert t.traverse([0, 0, 0]) == [2, 1, 0]
 
@@ -258,7 +243,7 @@ def test_interval_transducer_abac():
 def test_minimal_transducer_abac():
     w = [0, 1, 0, 2]
     t = minimal_transducer(w)
-    assert len(t.states) == 6
+    assert t.nr_states == 6
     assert transducer_connected_states(t) == [0, 1, 2, 3, 4, 5]
     assert t.traverse([0, 0, 0]) == [2, 1, 0]
 
@@ -330,12 +315,12 @@ def test_transducer_trim():
     check_transducer_trim(w, interval_transducer(w))
     check_transducer_trim(w, minimal_transducer(w))
 
-    t = Transducer(None, [], [])
+    t = Transducer(None, [], [], [])
     assert transducer_isomorphism(t, transducer_trim(t))
 
 
 def test_transducer_isomorphism():
-    t = Transducer(None, [], [])
+    t = Transducer(None, [], [], [])
     assert transducer_isomorphism(t, t)
 
     w = [0, 1, 0, 2]
@@ -360,7 +345,7 @@ def test_transducer_isomorphism():
     )
 
     t1 = treelike_transducer(v)
-    assert len(t1.states) == 15
+    assert t1.nr_states == 15
     assert transducer_connected_states(t1) == [
         0,
         1,
@@ -380,11 +365,11 @@ def test_transducer_isomorphism():
     ]
     t2 = transducer_induced_subtransducer(t1, list(range(8)))
     t3 = transducer_induced_subtransducer(t1, [0] + list(range(8, 15)))
-    assert len(t1.states) == len(transducer_connected_states(t1))
-    assert len(t2.states) == len(t3.states)
+    assert t1.nr_states == len(transducer_connected_states(t1))
+    assert t2.nr_states == t3.nr_states
     assert not transducer_isomorphism(t2, t3)
 
 
 def test_transducer_minimize():
-    t = Transducer(None, [], [])
+    t = Transducer(None, [], [], [])
     assert transducer_isomorphism(t, transducer_minimize(t))

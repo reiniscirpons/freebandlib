@@ -119,7 +119,9 @@ class Transducer:
         if not (
             isinstance(self.next_state, List)
             and all(
-                x is None or isinstance(x, StateId) for x in self.next_state
+                isinstance(x, List)
+                and all(y is None or isinstance(y, StateId) for y in x)
+                for x in self.next_state
             )
         ):
             raise RuntimeError(
@@ -128,7 +130,8 @@ class Transducer:
         if not (
             isinstance(self.next_letter, List)
             and all(
-                x is None or isinstance(x, OutputLetter)
+                isinstance(x, List)
+                and all(y is None or isinstance(y, OutputLetter) for y in x)
                 for x in self.next_letter
             )
         ):
@@ -138,9 +141,14 @@ class Transducer:
         if not (
             len(self.next_state) == len(self.next_letter)
             and all(
-                (x is None and y is None)
-                or (isinstance(x, StateId) and isinstance(y, OutputLetter))
-                for x, y in zip(self.next_state, self.next_letter)
+                all(
+                    (x is None and y is None)
+                    or (isinstance(x, StateId) and isinstance(y, OutputLetter))
+                    for x, y in zip(
+                        self.next_state[state], self.next_letter[state]
+                    )
+                )
+                for state in range(self.nr_states)
             )
         ):
             raise RuntimeError(
@@ -631,7 +639,7 @@ def treelike_transducer(word: OutputWord) -> Transducer:
     transducer = Transducer(None, [], [], [])
     assert transducer_pref.initial is not None
     assert transducer_suff.initial is not None
-    transducer.add_state(
+    transducer.initial = transducer.add_state(
         [
             offset_pref + transducer_pref.initial,
             offset_suff + transducer_suff.initial,
