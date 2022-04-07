@@ -11,6 +11,6 @@ clean:
 	rm -rf freebandlib/__pycache__
 
 coverage:
-	@coverage run --source . -m py.test
+	@coverage run --source . --omit="tests/*" -m py.test
 	@coverage html
 	@echo "See: htmlcov/index.html"
