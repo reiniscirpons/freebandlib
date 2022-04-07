@@ -180,7 +180,7 @@ _sample_42_more_words = (
 def check_multiply(
     w1: OutputWord,
     w2: OutputWord,
-    transducer_constructors: List[Transducer] = (
+    transducer_constructors=(
         treelike_transducer,
         interval_transducer,
     ),
