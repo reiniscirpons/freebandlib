@@ -16,9 +16,9 @@ from .digraph import (
     digraph_topological_order,
 )
 
-# from .minword import min_word
-
 from .equality import equivalent_words, equivalent_transducers
+
+from .minword import min_word
 
 from .multiply import multiply
 
@@ -30,6 +30,9 @@ from .transducer import (
     transducer_isomorphism,
     transducer_topological_order,
     transducer_induced_subtransducer,
+    treelike_transducer,
+    interval_transducer,
+    minimal_transducer,
 )
 
 from .words import cont, pref_ltof, suff_ftol, word_function

@@ -12,11 +12,6 @@ from freebandlib.transducer import (
     minimal_transducer,
 )
 
-from freebandlib.transducer import (
-    interval_transducer,
-    treelike_transducer,
-)
-
 
 def equivalent_words(word1: OutputWord, word2: OutputWord) -> bool:
     """ """
