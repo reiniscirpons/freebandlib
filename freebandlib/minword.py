@@ -68,7 +68,9 @@ def min_word(t: Transducer):
         s = len(w) - l + 1
         if B[q] is not None:
             i, j = B[q]
-            return w + w[i + l : j], B
+            if i == 0 or j == 0:
+                return w, B
+            return w + w[i + l - 1 : j], B
         w, B = min_word_recurse(t, t.next_state[q][0], w, l, B)
         c, k = classify_case(t, q)
         if c is Case.I:
@@ -81,13 +83,17 @@ def min_word(t: Transducer):
                 r = t.next_state[r][1]
             assert r is not None
             assert B[r] is not None
-            l = B[r][1] - B[r][0]
+            i, j = B[r]
+            if i == 0 or j == 0 or j < i:
+                l = 0
+            else:
+                l = j - i + 1
         else:
             w.append(t.next_letter[q][0])
             w.append(t.next_letter[q][1])
             l = 0
         w, B = min_word_recurse(t, t.next_state[q][1], w, l, B)
-        B[q] = (s, len(w) + 1)
+        B[q] = (s, len(w))
         return w, B
 
     B = [None] * t.nr_states
