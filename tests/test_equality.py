@@ -1,11 +1,11 @@
 """ Tests for freebandlib.multiply """
+
 import itertools
 from random import randint, random, shuffle
 from typing import List
 
 import pytest
-
-from freebandlib.equality import equivalent_transducers, equal_in_free_band
+from freebandlib.equality import equal_in_free_band, equivalent_transducers
 from freebandlib.transducer import interval_transducer, treelike_transducer
 from freebandlib.words import InputLetter, OutputWord, cont, word_function
 

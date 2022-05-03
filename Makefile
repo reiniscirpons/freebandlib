@@ -6,14 +6,21 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 
-doc: 
+doc:
 	cd docs && make html
+
+clean-benchmarks:
+	rm -rf .benchmarks
+	rm -rf benchmarks/samples
+
+clean-prof:
+	rm -rf prof
 
 clean-doc:
 	rm -rf docs/_build
 
-clean: clean-doc
-	rm -rf *.egg-info 
+clean: clean-doc clean-prof clean-benchmarks
+	rm -rf *.egg-info
 	rm -rf docs/build
 	rm -rf build/
 	rm -rf __pycache__/
@@ -23,6 +30,16 @@ clean: clean-doc
 	rm -rf .tox
 	rm -rf tests/__pycache__
 	rm -rf freebandlib/__pycache__
+
+superclean: clean
+	git clean -xdf --exclude *.swp --exclude *.swo
+
+.PHONY: superclean
+
+benchmarks:
+	pytest -v benchmarks/bench_interval.py --benchmark-save=interval
+
+.PHONY: benchmarks
 
 coverage:
 	@coverage run --source . --omit="tests/*" -m py.test
