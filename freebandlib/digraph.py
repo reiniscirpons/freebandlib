@@ -1,7 +1,4 @@
-"""Graph utility functions.
-
-TODO: Finish
-"""
+"""Graph utility functions."""
 from typing import List, Optional
 
 DigraphVertex = int
@@ -15,13 +12,13 @@ def digraph_reverse(digraph: DigraphAdjacencyList) -> DigraphAdjacencyList:
 
     Parameters
     ----------
-    digraph : DigraphAdjacencyList
-        An adjacency list
+    digraph: DigraphAdjacencyList
+        An adjacency list.
 
     Returns
     -------
     DigraphAdjacencyList
-        An adjacency list of the reverse digraph
+        An adjacency list of the reverse digraph.
 
     Notes
     -----
@@ -48,9 +45,9 @@ def digraph_is_reachable(
 
     Parameters
     ----------
-    digraph : DigraphAdjacencyList
-        An adjacency list
-    start : List[DigraphVertex]
+    digraph: DigraphAdjacencyList
+        An adjacency list.
+    start: List[DigraphVertex]
         The list of starting vertices.
 
     Returns
@@ -94,13 +91,14 @@ def digraph_topological_order(
 
     Parameters
     ----------
-    digraph : DigraphAdjacencyList
-        An adjacency list
+    digraph: DigraphAdjacencyList
+        An adjacency list.
 
     Returns
     -------
-    A list of vertices in topological order, if such an order exists, and
-    `None` otherwise.
+    Optional[List[DigraphVertex]]
+        A list of vertices in topological order, if such an order exists, and
+        `None` otherwise.
 
     Notes
     -----
