@@ -12,9 +12,11 @@ the paper.
 
 In particular, throughout this implementation, we assume that our input
 alphabet is :math:`{0, 1}` and our output alphabets are always finite sets of
-the form :math:`{0, 1, ..., n}` for some :math`n`.
+the form :math:`{0, 1, ..., n}` for some :math`n`. The output alphabet is
+usually implicit and is assumed to be the least alphabet required to represent
+all given elements.
 
-TODO: Finish
+For more information see Sections 3 and 4 of THEPAPER.
 """
 
 from __future__ import annotations
@@ -53,9 +55,9 @@ class Transducer:
         The the position of the initial state in the `states` list.
         Can be `None` to support empty transducer.
     next_state: List[List[Optional[StateId]]]
-        The state transition function
+        The state transition function.
     next_letter: List[List[Optional[Letter]]]
-        The letter transition function
+        The letter transition function.
     terminal: List[bool]
         A list indicating if the `i`-th state is terminal or not.
 
@@ -92,13 +94,15 @@ class Transducer:
         self.next_state = next_state
         self.terminal = terminal
         self.label = label
-        self.validate()  # TODO(RC) not sure if you want this here!
+        self.validate()
 
     @property
     def nr_states(self) -> int:
+        """The number of states used by the transducer."""
         return len(self.next_letter)
 
     def copy(self) -> Transducer:
+        """Create a copy of the transducer."""
         return Transducer(
             self.initial,
             self.next_state[::],
@@ -108,6 +112,7 @@ class Transducer:
         )
 
     def validate(self):
+        """Check that the transducer is valid."""
         if not (self.initial is None or isinstance(self.initial, StateId)):
             raise RuntimeError("self.initial must be None or a StateId")
         if self.initial is not None and (
@@ -213,7 +218,7 @@ class Transducer:
         return self.nr_states - 1
 
     def traverse(self, word: InputWord) -> Optional[OutputWord]:
-        """Traverse an input word through the trasducer and return its output.
+        """Traverse an input word through the transducer and return its output.
 
         Parameters
         ----------
@@ -224,11 +229,7 @@ class Transducer:
         -------
         Optional[OutputWord]
             The output word corresponding to the input, if a terminal state is
-            reached while traversing the input word and None otherwise.
-
-        Notes
-        -----
-        TODO: Just add a reference here?
+            reached while traversing the input word and `None` otherwise.
         """
         if self.initial is None:
             return None
@@ -281,6 +282,7 @@ def transducer_connected_states(transducer: Transducer) -> List[StateId]:
     Parameters
     ----------
     transducer: Transducer
+        A transducer.
 
     Returns
     -------
@@ -293,13 +295,13 @@ def transducer_connected_states(transducer: Transducer) -> List[StateId]:
 
     Notes
     -----
-    A transducer state is _accessible_ if it there is a path leading to it from
-    the initial state. It is _coaccessible_ if there is a path from it to a
+    A transducer state is *accessible* if it there is a path leading to it from
+    the initial state. It is *coaccessible* if there is a path from it to a
     terminal state.
 
-    A state is _connected_ if it is both accessible and
+    A state is *connected* if it is both accessible and
     coaccessiable, i.e. if it is on a path from the initial state to a terminal
-    one. Otherwise we call a state _disconnected_.
+    one. Otherwise we call a state *disconnected*.
     """
     if transducer.initial is None:
         return []
@@ -336,6 +338,7 @@ def transducer_topological_order(
     Parameters
     ----------
     transducer: Transducer
+        A transducer.
 
     Returns
     -------
@@ -366,7 +369,7 @@ def transducer_induced_subtransducer(
     Parameters
     ----------
     transducer: Transducer
-        The base transducer.
+        A transducer.
     states: List[StateId]
         A list of states of the given transducer that will be used to generate
         the induced subtransducer.
@@ -381,7 +384,6 @@ def transducer_induced_subtransducer(
     For a given transducer and a collection of states, the subtransducer
     induced by those states is obtained by removing all of the states not in
     the collection.
-    TODO: Better description, maybe a reference?
     """
 
     state: StateId
@@ -431,6 +433,7 @@ def transducer_trim(transducer: Transducer) -> Transducer:
     Parameters
     ----------
     transducer: Transducer
+        A transducer.
 
     Returns
     -------
@@ -444,9 +447,9 @@ def transducer_trim(transducer: Transducer) -> Transducer:
     Notes
     -----
     If a state is disconnected, then removing it does not change the function
-    that the transducer realizes. _Trimming_ a transducer removes all of its
+    that the transducer realizes. *Trimming* a transducer removes all of its
     disconnected states. A transducer whose states are all connected is called
-    _trim_.
+    *trim*.
     """
     connected_states: List[StateId] = transducer_connected_states(transducer)
     return transducer_induced_subtransducer(transducer, connected_states)
@@ -460,16 +463,27 @@ def transducer_isomorphism(
     Parameters
     ----------
     transducer1: Transducer
+        A trim transducer.
     transducer2: Transducer
+        A trim transducer.
 
     Returns
     -------
     bool
         `True` if the transducers are isomorphic and `False` otherwise.
 
+    Raises
+    ------
+    RuntimeError
+        If either transducer is not trim.
+
+    See Also
+    --------
+    transducer_trim: A function that trims a transducer.
+
     Notes
     -----
-    Two transducers are _isomorphic_ if there exists a bijection between states
+    Two transducers are *isomorphic* if there exists a bijection between states
     that also preserves transitions and transition outputs.
     """
     if len(transducer_connected_states(transducer1)) != transducer1.nr_states:
@@ -530,6 +544,7 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
     Parameters
     ----------
     transducer: Transducer
+        A transducer.
 
     Return
     ------
@@ -607,14 +622,27 @@ def transducer_minimize(transducer: Transducer) -> Transducer:
 
 
 """
-Section 4: Examples of transducers realizing f_w.
-
-TODO: writeup
+Examples of transducers realizing :math:`f_w`.
 """
 
 
 def treelike_transducer(word: OutputWord) -> Transducer:
-    """Return the treelike transducer associated with a word."""
+    """Return the treelike transducer associated with a word.
+
+    Parameters
+    ----------
+    word: OutputWord
+        A word.
+
+    Returns
+    -------
+    Transducer
+        The treelike transducer associated with `word`.
+
+    Notes
+    -----
+    The treelike transducer is defined in Example 3.3. of THEPAPER.
+    """
     transducer: Transducer
     pref: Optional[OutputWord]
     suff: Optional[OutputWord]
@@ -666,7 +694,23 @@ def treelike_transducer(word: OutputWord) -> Transducer:
 
 
 def interval_transducer(word: OutputWord) -> Transducer:
-    """TODO: description"""
+    """Return the interval transducer associated with a word.
+
+    Parameters
+    ----------
+    word: OutputWord
+        A word.
+
+    Returns
+    -------
+    Transducer
+        The interval transducer associated with `word`.
+
+    Notes
+    -----
+    Implements the `IntervalTransducer` algorithm of THEPAPER based on the
+    Radoszewski-Rytter method for equality checking in RR2010aa.
+    """
     size_cont: int
     right: List[List[Optional[int]]]
     left: List[List[Optional[int]]]
@@ -749,15 +793,19 @@ def transducer_precompute_q(
     Parameters
     ----------
     state: Optional[StateId]
+        The starting state.
     letter: InputLetter
+        An input letter.
     transducer: Transducer
+        A transducer.
 
     Returns
     -------
     List[StateId]
-        The list of states `[q_0, q_1, q_2, ..., q_n]` where `q_0` is the
+        The list of states `[q_0, q_1, q_2, ..., q_n]` where `q_0` is
         `state`, `q_n` is a terminal state, and there is a transition from `q_i`
-        into `q_{i+1}` labelled by input letter `letter`.
+        into `q_{i+1}` labelled by the input letter `letter` for each `i`.
+        Returns empty list of `state` is `None`.
     """
     if state is None:
         return []
@@ -776,11 +824,18 @@ def transducer_cont(
     Parameters
     ----------
     state: State
+        A state of `transducer`.
     transducer: Transducer
+        A transducer.
 
     Returns
     -------
     Set[OutputLetter]
+        The content of the element represented by `state` in `transducer`.
+
+    See also
+    --------
+    cont: The content of a word.
     """
     q = transducer_precompute_q(state, 0, transducer)
     content: Set[OutputLetter] = set()
@@ -792,5 +847,20 @@ def transducer_cont(
 
 
 def minimal_transducer(word: OutputWord) -> Transducer:
-    """ """
+    """Return the minimal transducer representing `word`.
+
+    Parameters
+    ----------
+    word: OutputWord
+        A word.
+
+    Returns
+    -------
+    Transducer
+        The minimal transducer representing `word`.
+
+    See Also
+    --------
+    transducer_minimize: For minimizing a transducer.
+    """
     return transducer_minimize(interval_transducer(word))
