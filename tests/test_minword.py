@@ -3,7 +3,7 @@ from freebandlib import (
     transducer_minimize,
     treelike_transducer,
     interval_transducer,
-    equivalent_words,
+    equal_in_free_band,
 )
 from freebandlib.minword import Case, classify_case
 
@@ -23,25 +23,25 @@ def test_classify_case():
 def test_min_word():
     w = [0, 1, 0, 2]
     t = transducer_minimize(treelike_transducer(w))
-    # assert equivalent_words(min_word(t), w)
+    # assert equal_in_free_band(min_word(t), w)
     assert min_word(t) == w
 
     w = [0, 1, 0, 2]
     t = transducer_minimize(interval_transducer(w))
-    # assert equivalent_words(min_word(t), w)
+    # assert equal_in_free_band(min_word(t), w)
     assert min_word(t) == w
 
     w = [1, 2, 0, 2, 1, 2, 3]
     t = transducer_minimize(interval_transducer(w))
-    # assert equivalent_words(min_word(t), w)
+    # assert equal_in_free_band(min_word(t), w)
     assert min_word(t) == w
 
     w = [4, 0, 4, 2]
     t = transducer_minimize(interval_transducer(w))
-    # assert equivalent_words(min_word(t), w)
+    # assert equal_in_free_band(min_word(t), w)
     assert min_word(t) == w
 
     w = [1, 2, 0, 2, 1, 2, 3, 4, 0, 4, 2]
     t = transducer_minimize(interval_transducer(w))
-    # assert equivalent_words(min_word(t), w)
+    # assert equal_in_free_band(min_word(t), w)
     assert min_word(t) == w

@@ -15,9 +15,9 @@ transducers representing elements of a free band from the ``freebandlib``.
 .. autosummary::
    :nosignatures:
   
-    equivalent_words 
+    equal_in_free_band
     equivalent_transducers
 
-.. autofunction:: equivalent_words
+.. autofunction:: equal_in_free_band
 
 .. autofunction:: equivalent_transducers

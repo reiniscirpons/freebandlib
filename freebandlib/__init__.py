@@ -16,7 +16,7 @@ from .digraph import (
     digraph_topological_order,
 )
 
-from .equality import equivalent_words, equivalent_transducers
+from .equality import equal_in_free_band, equivalent_transducers
 
 from .minword import min_word
 
