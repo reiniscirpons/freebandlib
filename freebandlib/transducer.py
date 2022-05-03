@@ -677,6 +677,9 @@ def interval_transducer(word: OutputWord) -> Transducer:
     ll: Optional[int]
     terminal: List[bool]
 
+    if len(word) == 0:
+        return Transducer(0, [[None, None]], [[None, None]], [True])
+
     size_cont = len(cont(word))
     right = [compute_right(k, word) for k in range(1, size_cont + 1)]
     left = [compute_left(k, word) for k in range(1, size_cont + 1)]
