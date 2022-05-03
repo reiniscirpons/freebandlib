@@ -4,14 +4,13 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Multiplying
-===========
+Words
+=====
 
 .. currentmodule:: freebandlib
 
-This page contains the documentation for finding short-lex minimum words
-equivalent to a word or transducer representing an element of a free band in
-``freebandlib``.
+This page contains the documentation for computing various functions on words
+in ``freebandlib``.
 
 .. autosummary::
    :nosignatures:
