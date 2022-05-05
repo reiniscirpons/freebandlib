@@ -37,7 +37,7 @@ superclean: clean
 .PHONY: superclean
 
 benchmarks:
-	pytest -v benchmarks/bench_interval.py --benchmark-save=interval
+	pytest -n 4 -v benchmarks/bench_interval.py --benchmark-save=interval
 
 .PHONY: benchmarks
 
