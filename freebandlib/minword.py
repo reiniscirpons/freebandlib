@@ -1,7 +1,6 @@
-"""Short-lex least word representing the same free band element as a
-transducer.
+"""Compute the short-lex least word representing a free band element.
 
-TODO: Finish
+See Section 6 of THEPAPER for more information.
 """
 # pylint: disable=invalid-name
 
@@ -19,17 +18,13 @@ class Case(Enum):
     II = 2
     III = 3
 
-
-# *    = letter transition
-# circ = state transition
 def classify_case(t: Transducer, q: StateId) -> Tuple[Case, int]:
-    r"""Given a transducer and a state id return the case of Lemma 5.3 that
-    applies.
+    """Given a transducer and a state return the appropriate case of Lemma 5.3.
 
     Parameters
     ----------
     t: Transducer
-        A transducer representing :math:`x\in\FB(A)`.
+        A transducer representing :math:`x\\in\\textrm{FB}(A)`.
     q : StateId
         A value representing a state in t
 
@@ -38,6 +33,10 @@ def classify_case(t: Transducer, q: StateId) -> Tuple[Case, int]:
     Tuple[Case, int]
         The case of Lemma 5.3 that applies, and the relevant value of
         :math:`k`.
+
+    Notes
+    -----
+    Implements the `ClassifyCase` algorithm of THEPAPER.
     """
     N = len(transducer_cont(q, t))
     if t.next_letter[q][0] == t.next_letter[q][1]:
@@ -56,7 +55,24 @@ def classify_case(t: Transducer, q: StateId) -> Tuple[Case, int]:
     assert False
 
 
-def min_word(t: Transducer):
+def min_word(t: Transducer) -> OutputWord:
+    """Compute the short-lex least word representing the same element as `t`.
+
+    Parameters
+    ----------
+    t: Transducer
+        A transducer representing :math:`x\\in\\textrm{FB}(A)`.
+
+    Returns
+    -------
+    OutputWord
+        The short-lex least word equivalent to :math:`x`.
+
+    Notes
+    -----
+    Implements a version of the `MinWord` algorithm of THEPAPER.
+    """
+    # TODO: Move this outside the wrapped function?
     def min_word_recurse(
         t: Transducer,
         q: StateId,

@@ -1,6 +1,6 @@
-"""Transducer multiplication functions.
+"""Functions for computing the product transducer.
 
-TODO: Finish
+See Section 5 of THEPAPER for more information.
 """
 
 from typing import List, Optional, Tuple
@@ -22,7 +22,7 @@ def compute_k(
     Parameters
     ----------
     alpha: int
-        Should be 0 or 1
+        An integer, either 0 or 1.
     transducer_x : Transducer
         A transducer representing :math:`x\in\FB(A)`.
     transducer_y : Transducer
@@ -33,6 +33,10 @@ def compute_k(
     List[List[int]]
         The partial function :math:`\overline{K}_{\alpha}` implemented as a
         two dimensional list.
+
+    Notes
+    -----
+    Implements the `ComputeK` algorithm of THEPAPER.
     """
     q_x = transducer_precompute_q(transducer_x.initial, 1, transducer_x)
     q_y = transducer_precompute_q(transducer_y.initial, 0, transducer_y)
@@ -78,6 +82,24 @@ def compute_k(
 
 
 def multiply(transducer_x: Transducer, transducer_y: Transducer) -> Transducer:
+    """Compute the product transducer.
+
+    Parameters
+    ----------
+    transducer_x: Transducer
+        A transducer.
+    transducer_y: Transducer
+        A transducer.
+
+    Returns
+    -------
+    Transducer
+        The product transducer.
+
+    Notes
+    -----
+    Implements the `Multiply` algorithm of THEPAPER.
+    """
     product_transducer = Transducer(None, [], [], [])
     # Copy each of the existing transducers
     inclusion_x: List[Optional[StateId]] = [
