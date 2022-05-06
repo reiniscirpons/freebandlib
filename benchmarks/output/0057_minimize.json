@@ -1,0 +1,315 @@
+{
+    "machine_info": {
+        "node": "MCFVFFH345Q05P",
+        "processor": "arm",
+        "machine": "arm64",
+        "python_compiler": "Clang 13.0.0 (clang-1300.0.29.30)",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.9.12",
+        "python_version": "3.9.12",
+        "python_build": [
+            "main",
+            "Mar 26 2022 15:45:34"
+        ],
+        "release": "20.3.0",
+        "system": "Darwin",
+        "cpu": {
+            "python_version": "3.9.12.final.0 (64 bit)",
+            "cpuinfo_version": [
+                8,
+                0,
+                0
+            ],
+            "cpuinfo_version_string": "8.0.0",
+            "arch": "ARM_8",
+            "bits": 64,
+            "count": 8,
+            "arch_string_raw": "arm64",
+            "brand_raw": "Apple M1"
+        }
+    },
+    "commit_info": {
+        "id": "8e1b441c3365a9e33a7dcbe569be6352effdf3b7",
+        "time": "2022-05-06T17:39:13+01:00",
+        "author_time": "2022-05-06T17:07:21+01:00",
+        "dirty": true,
+        "project": "freebandlib",
+        "branch": "master"
+    },
+    "benchmarks": [
+        {
+            "group": null,
+            "name": "test_transducer_minimize[20144-transducer4]",
+            "fullname": "benchmarks/bench_minimize_08.py::test_transducer_minimize[20144-transducer4]",
+            "param": "20144-transducer4",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.016009708000000344,
+                "max": 1.3812156249999994,
+                "mean": 0.043610693275862034,
+                "stddev": 0.17875151688363008,
+                "rounds": 58,
+                "median": 0.019816146000000145,
+                "iqr": 0.005444457999999486,
+                "q1": 0.016903792000000806,
+                "q3": 0.02234825000000029,
+                "iqr_outliers": 2,
+                "stddev_outliers": 1,
+                "outliers": "1;2",
+                "ld15iqr": 0.016009708000000344,
+                "hd15iqr": 0.03171937499999977,
+                "ops": 22.930155998081492,
+                "total": 2.529420209999998,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_transducer_minimize[176-transducer10]",
+            "fullname": "benchmarks/bench_minimize_08.py::test_transducer_minimize[176-transducer10]",
+            "param": "176-transducer10",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.000461624999999799,
+                "max": 0.0042219590000005525,
+                "mean": 0.0006218153467336814,
+                "stddev": 0.0003206037837986816,
+                "rounds": 1990,
+                "median": 0.0004839375000003088,
+                "iqr": 3.245799999973542e-05,
+                "q1": 0.0004769580000001383,
+                "q3": 0.0005094159999998737,
+                "iqr_outliers": 377,
+                "stddev_outliers": 331,
+                "outliers": "331;377",
+                "ld15iqr": 0.000461624999999799,
+                "hd15iqr": 0.0005586250000000348,
+                "ops": 1608.194466818607,
+                "total": 1.237412540000026,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_transducer_minimize[82411-transducer18]",
+            "fullname": "benchmarks/bench_minimize_08.py::test_transducer_minimize[82411-transducer18]",
+            "param": "82411-transducer18",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.09429783300000061,
+                "max": 0.9671743330000009,
+                "mean": 0.19559057388888887,
+                "stddev": 0.2893759695373712,
+                "rounds": 9,
+                "median": 0.0991069170000003,
+                "iqr": 0.010097500250000113,
+                "q1": 0.09511260374999919,
+                "q3": 0.1052101039999993,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 0.09429783300000061,
+                "hd15iqr": 0.9671743330000009,
+                "ops": 5.112720823489583,
+                "total": 1.7603151649999997,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_transducer_minimize[34741-transducer21]",
+            "fullname": "benchmarks/bench_minimize_08.py::test_transducer_minimize[34741-transducer21]",
+            "param": "34741-transducer21",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.04053966699999911,
+                "max": 0.6982117080000005,
+                "mean": 0.07881945650000009,
+                "stddev": 0.13848384587220594,
+                "rounds": 22,
+                "median": 0.0487566665000001,
+                "iqr": 0.00870399899999974,
+                "q1": 0.04431283399999941,
+                "q3": 0.05301683299999915,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 0.04053966699999911,
+                "hd15iqr": 0.6982117080000005,
+                "ops": 12.68722272907323,
+                "total": 1.7340280430000021,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_transducer_minimize[126799-transducer28]",
+            "fullname": "benchmarks/bench_minimize_08.py::test_transducer_minimize[126799-transducer28]",
+            "param": "126799-transducer28",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.17173895800000238,
+                "max": 0.9675824159999991,
+                "mean": 0.3111558540000008,
+                "stddev": 0.32164393362216287,
+                "rounds": 6,
+                "median": 0.18011910450000101,
+                "iqr": 0.013941541000001223,
+                "q1": 0.176717,
+                "q3": 0.19065854100000124,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 0.17173895800000238,
+                "hd15iqr": 0.9675824159999991,
+                "ops": 3.2138235136659117,
+                "total": 1.8669351240000047,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_transducer_minimize[205-transducer35]",
+            "fullname": "benchmarks/bench_minimize_08.py::test_transducer_minimize[205-transducer35]",
+            "param": "205-transducer35",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.0008361659999991389,
+                "max": 0.004659666000002005,
+                "mean": 0.001115317554389343,
+                "stddev": 0.0005158115325412743,
+                "rounds": 1048,
+                "median": 0.0008951664999994335,
+                "iqr": 6.779200000117669e-05,
+                "q1": 0.0008745000000001113,
+                "q3": 0.000942292000001288,
+                "iqr_outliers": 208,
+                "stddev_outliers": 164,
+                "outliers": "164;208",
+                "ld15iqr": 0.0008361659999991389,
+                "hd15iqr": 0.0010527499999994916,
+                "ops": 896.6056313419351,
+                "total": 1.1688527970000315,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_transducer_minimize[127457-transducer42]",
+            "fullname": "benchmarks/bench_minimize_08.py::test_transducer_minimize[127457-transducer42]",
+            "param": "127457-transducer42",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.17671408400000033,
+                "max": 1.2206080839999984,
+                "mean": 0.35852461133333396,
+                "stddev": 0.4224186219266072,
+                "rounds": 6,
+                "median": 0.1885834585000019,
+                "iqr": 0.02138783299999858,
+                "q1": 0.17763537500000126,
+                "q3": 0.19902320799999984,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 0.17671408400000033,
+                "hd15iqr": 1.2206080839999984,
+                "ops": 2.7892087973571833,
+                "total": 2.1511476680000037,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_transducer_minimize[206-transducer45]",
+            "fullname": "benchmarks/bench_minimize_08.py::test_transducer_minimize[206-transducer45]",
+            "param": "206-transducer45",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.0009132499999999766,
+                "max": 0.0032171250000025964,
+                "mean": 0.0012132980229007417,
+                "stddev": 0.0004854638583818329,
+                "rounds": 393,
+                "median": 0.00100966600000163,
+                "iqr": 7.06974999999943e-05,
+                "q1": 0.0009878644999998798,
+                "q3": 0.001058561999999874,
+                "iqr_outliers": 69,
+                "stddev_outliers": 58,
+                "outliers": "58;69",
+                "ld15iqr": 0.0009132499999999766,
+                "hd15iqr": 0.0011750829999996881,
+                "ops": 824.1998100427207,
+                "total": 0.4768261229999915,
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2022-05-06T17:05:03.624451",
+    "version": "3.4.1"
+}

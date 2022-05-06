@@ -11,7 +11,7 @@ doc:
 
 clean-benchmarks:
 	rm -rf .benchmarks
-	rm -rf benchmarks/samples
+	rm -f benchmarks/bench_minimize_*.py
 
 clean-prof:
 	rm -rf prof
@@ -40,9 +40,26 @@ benchmark-interval:
 	pytest -n 4 -v benchmarks/bench_interval.py --benchmark-save=interval
 
 benchmark-minimize:
-	pytest -n 4 -v benchmarks/bench_minimize.py --benchmark-save=minimize
-
-.PHONY: benchmarks
+	pytest -n 6 -v benchmarks/bench_minimize_00.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_01.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_02.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_03.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_04.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_05.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_06.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_07.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_08.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_09.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_10.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_11.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_12.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_13.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_14.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_15.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_16.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_17.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_18.py --benchmark-save=minimize
+	pytest -n 6 -v benchmarks/bench_minimize_19.py --benchmark-save=minimize
 
 coverage:
 	@coverage run --source . --omit="tests/*" -m py.test

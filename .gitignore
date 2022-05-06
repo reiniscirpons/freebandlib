@@ -1,3 +1,4 @@
+*.DS_STORE
 *.egg
 *.egg-info/
 *.py[cod]
@@ -7,6 +8,7 @@
 .coverage
 .tox/
 __pycache__/
+benchmarks/bench_minimize*
 benchmarks/samples/
 build/
 dist/

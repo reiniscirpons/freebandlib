@@ -61,6 +61,19 @@ def generate_interval_transducers():
             write_gzip_pickle_file(fname, interval_transducer(sample))
 
 
+def split_file(fname, num_parts):
+    f = gzip.open(fname, "rb")
+    fname = ".".join(fname.split(".")[:-1])
+    subfiles = [f"{fname}_{n:02}.gz" for n in range(num_parts)]
+    subfiles = [gzip.open(x, "wb") for x in subfiles]
+    while True:
+        try:
+            for n in range(num_parts):
+                pickle.dump(pickle.load(f), subfiles[n])
+        except EOFError:
+            break
+
+
 # Pre-processing:
 #
 # 1. Generate a sample of random words (store) X
