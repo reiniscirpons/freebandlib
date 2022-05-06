@@ -2,6 +2,10 @@
 import itertools
 import pickle
 import random
+import os
+import gzip
+
+from freebandlib import interval_transducer
 
 
 def random_word(length_alphabet, length_word):
@@ -17,8 +21,13 @@ def random_word_sample(length_alphabet, length_word, num_words):
 #    pass
 
 
-def write_benchmark_sample(fname, sample):
-    with open(fname, "wb") as f:
+def write_pickle_file(fname, sample, mode="wb"):
+    with open(fname, mode) as f:
+        pickle.dump(sample, f)
+
+
+def write_gzip_pickle_file(fname, sample):
+    with gzip.open(fname, "ab") as f:
         pickle.dump(sample, f)
 
 
@@ -27,18 +36,35 @@ def write_benchmark_sample(fname, sample):
 # num_words: 100
 
 
-def generate(alphabet_range, word_range, num_words):
+def generate_words(alphabet_range, word_range, num_words):
+    if not os.path.exists("benchmarks/samples"):
+        os.mkdir("benchmarks/samples")
     for length_alphabet in alphabet_range:
         for length_word in word_range:
             fname = f"benchmarks/samples/{num_words:04}_words_{length_alphabet:04}_letters_{length_word:04}_length"
             sample = random_word_sample(length_alphabet, length_word, num_words)
-            write_benchmark_sample(fname, sample)
+            write_pickle_file(fname, sample)
+
+
+def generate_interval_transducers():
+    path = "benchmarks/samples"
+    sample = []
+    fname = path + "/interval_transducers.gz"
+    if os.path.exists(fname) and os.path.isfile(fname):
+        os.remove(fname)
+    for i, x in enumerate(sorted(os.listdir(path))):
+        if x.startswith(".") or x == "interval_transducers.gz":
+            continue
+        x = path + "/" + x
+        print(f"Processing {x} . . .")
+        for sample in pickle.load(open(x, "rb"))[:10]:
+            write_gzip_pickle_file(fname, interval_transducer(sample))
 
 
 # Pre-processing:
 #
-# 1. Generate a sample of random words (store)
-# 2. Generate interval transducers (store)
+# 1. Generate a sample of random words (store) X
+# 2. Generate interval transducers (store) X
 # 3. Minimize the transducers from 2. (store)
 # 4. Random words over a given alphabet + content and generate pairs of them
 
