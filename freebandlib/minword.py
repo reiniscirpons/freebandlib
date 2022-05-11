@@ -18,6 +18,7 @@ class Case(Enum):
     II = 2
     III = 3
 
+
 def classify_case(t: Transducer, q: StateId) -> Tuple[Case, int]:
     """Given a transducer and a state return the appropriate case of Lemma 5.3.
 
