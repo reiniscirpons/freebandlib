@@ -1,4 +1,4 @@
-""" Benchmarks for isomorphism of transducers """
+""" Benchmarks for minimal word """
 
 import os
 import sys
@@ -26,7 +26,7 @@ def __save(self, output_json, save):
 
 pytest_benchmark.storage.file.FileStorage.save = __save
 
-from freebandlib import transducer_isomorphism
+from freebandlib import min_word, transducer_cont
 
 
 def get_samples(fnam):
@@ -37,15 +37,17 @@ def get_samples(fnam):
             samples.append(pickle.load(f))
         except EOFError:
             break
-    samples = [(x.nr_states, x) for x in samples]
+    samples = [(x.nr_states, max(transducer_cont(x.initial, x)), x) for x in samples]
     return samples
 
 
 samples = get_samples("benchmarks/samples/minimal_transducers.gz")
 
 
-@pytest.mark.parametrize("transducer_size,transducer", samples)
-def test_interval_transducer_creation(benchmark, transducer_size, transducer):
+@pytest.mark.parametrize("transducer_size,alphabet_size,transducer", samples)
+def test_interval_transducer_creation(
+    benchmark, transducer_size, alphabet_size, transducer
+):
     @benchmark
     def wrapper():
-        transducer_isomorphism(transducer, transducer)
+        min_word(transducer)

@@ -1,4 +1,4 @@
-""" Benchmarks for the creation of interval automata """
+""" Benchmarks for equality of words in the free band """
 
 import os
 import sys

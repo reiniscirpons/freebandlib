@@ -67,6 +67,9 @@ benchmark-minimize:
 benchmark-isomorphism:
 	pytest -n 4 -v benchmarks/bench_isomorphism.py --benchmark-save=isomorphism
 
+benchmark-minword:
+	pytest -n 4 -v benchmarks/bench_minword.py --benchmark-save=minword
+
 coverage:
 	@coverage run --source . --omit="tests/*" -m py.test
 	@coverage html
