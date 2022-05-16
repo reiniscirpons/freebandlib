@@ -76,16 +76,16 @@ def split_file(fname, num_parts):
 
 # Pre-processing:
 #
-# 1. Generate a sample of random words (store) X
-# 2. Generate interval transducers (store) X
-# 3. Minimize the transducers from 2. (store)
-# 4. Random words over a given alphabet + content and generate pairs of them
+# 1. [x] Generate a sample of random words (store) X
+# 2. [x] Generate interval transducers (store) X
+# 3. [x] Minimize the transducers from 2. (store)
+# 4. [ ] Random words over a given alphabet + content and generate pairs of them
 
 # Benchmarks
-# 1. Benchmark creation of interval transducers from words
-# 2. Benchmark minimization
-# 3. Benchmark isomorphism checking of minimized transducers
-# 4. Benchmark equality checking of pairs of words (1 + 2 + 3)
-# 5. Benchmark multiplication on interval transducers
-# 6. Benchmark multiplication on minimal transducers
-# 7. Min. word of minimal transducers
+# 1. [x] Benchmark creation of interval transducers from words
+# 2. [x] Benchmark minimization
+# 3. [x] Benchmark isomorphism checking of minimized transducers
+# 4. [x] Benchmark equality checking of pairs of words (1 + 2 + 3)
+# 5. [ ] Benchmark multiplication on interval transducers
+# 6. [ ] Benchmark multiplication on minimal transducers
+# 7. [x] Min. word of minimal transducers
