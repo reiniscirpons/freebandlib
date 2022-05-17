@@ -40,7 +40,7 @@ benchmark-interval:
 	pytest -n 4 -v benchmarks/bench_interval.py --benchmark-save=interval
 
 benchmark-equal:
-	pytest -n 4 -v benchmarks/bench_equal.py --benchmark-save=equal
+	pytest -n 6 -v benchmarks/bench_equal.py --benchmark-save=equal
 
 benchmark-minimize:
 	pytest -n 6 -v benchmarks/bench_minimize_00.py --benchmark-save=minimize
