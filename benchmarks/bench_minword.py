@@ -37,7 +37,9 @@ def get_samples(fnam):
             samples.append(pickle.load(f))
         except EOFError:
             break
-    samples = [(x.nr_states, max(transducer_cont(x.initial, x)), x) for x in samples]
+    samples = [
+        (x.nr_states, max(transducer_cont(x.initial, x)), x) for x in samples
+    ]
     return samples
 
 
@@ -45,9 +47,7 @@ samples = get_samples("benchmarks/samples/minimal_transducers.gz")
 
 
 @pytest.mark.parametrize("transducer_size,alphabet_size,transducer", samples)
-def test_interval_transducer_creation(
-    benchmark, transducer_size, alphabet_size, transducer
-):
+def test_minword(benchmark, transducer_size, alphabet_size, transducer):
     @benchmark
     def wrapper():
         min_word(transducer)

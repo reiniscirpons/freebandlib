@@ -45,7 +45,7 @@ samples = get_samples("benchmarks/samples/minimal_transducers.gz")
 
 
 @pytest.mark.parametrize("transducer_size,transducer", samples)
-def test_interval_transducer_creation(benchmark, transducer_size, transducer):
+def test_transducer_isomorphism(benchmark, transducer_size, transducer):
     @benchmark
     def wrapper():
         transducer_isomorphism(transducer, transducer)
