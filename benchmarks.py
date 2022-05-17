@@ -5,7 +5,7 @@ import random
 import os
 import gzip
 
-from freebandlib import interval_transducer
+from freebandlib import interval_transducer, transducer_minimize
 
 
 def random_word(length_alphabet, length_word):
@@ -59,6 +59,27 @@ def generate_interval_transducers():
         print(f"Processing {x} . . .")
         for sample in pickle.load(open(x, "rb"))[:10]:
             write_gzip_pickle_file(fname, interval_transducer(sample))
+
+
+def generate_minimal_transducers():
+    path = "benchmarks/samples"
+    sample = []
+    fname = path + "/minimal_transducers.gz"
+    if os.path.exists(fname) and os.path.isfile(fname):
+        os.remove(fname)
+    for i, x in enumerate(sorted(os.listdir(path))):
+        if not x.startswith("interval_transducers"):
+            continue
+        x = path + "/" + x
+        print(f"Processing {x} . . .")
+        with gzip.open(x, "rb") as f:
+            while True:
+                try:
+                    write_gzip_pickle_file(
+                        fname, transducer_minimize(pickle.load(f))
+                    )
+                except EOFError:
+                    break
 
 
 def split_file(fname, num_parts):
