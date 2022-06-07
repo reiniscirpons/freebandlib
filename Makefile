@@ -12,6 +12,7 @@ doc:
 clean-benchmarks:
 	rm -rf .benchmarks
 	rm -f benchmarks/bench_minimize_*.py
+	rm -f benchmarks/bench_interval_multiply_*.py
 
 clean-prof:
 	rm -rf prof
@@ -42,27 +43,22 @@ benchmark-interval:
 benchmark-equal:
 	pytest -n 6 -v benchmarks/bench_equal.py --benchmark-save=equal
 
-benchmark-minimize:
-	pytest -n 6 -v benchmarks/bench_minimize_00.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_01.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_02.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_03.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_04.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_05.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_06.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_07.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_08.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_09.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_10.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_11.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_12.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_13.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_14.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_15.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_16.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_17.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_18.py --benchmark-save=minimize
-	pytest -n 6 -v benchmarks/bench_minimize_19.py --benchmark-save=minimize
+INTERVAL_TEST_CASES = 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
+
+benchmark-minimize-generate-benchmarks:
+	$(foreach var,$(INTERVAL_TEST_CASES),sed 's/{{NUM}}/$(var)/g' ./benchmarks/templates/bench_minimize.py > ./benchmarks/bench_minimize_$(var).py;)
+
+benchmark-interval-multiply-generate-benchmarks:
+	$(foreach var,$(INTERVAL_TEST_CASES),sed 's/{{NUM}}/$(var)/g' ./benchmarks/templates/bench_interval_multiply.py > ./benchmarks/bench_interval_multiply_$(var).py;)
+
+benchmark-minimize: benchmark-minimize-generate-benchmarks
+	$(foreach var,$(INTERVAL_TEST_CASES),pytest -n 6 -v benchmarks/bench_minimize_$(var).py --benchmark-save=minimize;)
+
+benchmark-interval-multiply: benchmark-interval-multiply-generate-benchmarks
+	$(foreach var,$(INTERVAL_TEST_CASES),pytest -n 6 -v benchmarks/bench_interval_multiply_$(var).py --benchmark-save=interval_multiply;)
+
+benchmark-minimal-multiply: 
+	pytest -n 4 -v benchmarks/bench_minimal_multiply.py --benchmark-save=minimal_multiply
 
 benchmark-isomorphism:
 	pytest -n 4 -v benchmarks/bench_isomorphism.py --benchmark-save=isomorphism
