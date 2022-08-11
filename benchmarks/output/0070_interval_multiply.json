@@ -1,0 +1,179 @@
+{
+    "machine_info": {
+        "node": "MCFVFFH345Q05P",
+        "processor": "arm",
+        "machine": "arm64",
+        "python_compiler": "Clang 13.0.0 (clang-1300.0.29.30)",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.9.12",
+        "python_version": "3.9.12",
+        "python_build": [
+            "main",
+            "Mar 26 2022 15:45:34"
+        ],
+        "release": "20.3.0",
+        "system": "Darwin",
+        "cpu": {
+            "python_version": "3.9.12.final.0 (64 bit)",
+            "cpuinfo_version": [
+                8,
+                0,
+                0
+            ],
+            "cpuinfo_version_string": "8.0.0",
+            "arch": "ARM_8",
+            "bits": 64,
+            "count": 8,
+            "arch_string_raw": "arm64",
+            "brand_raw": "Apple M1"
+        }
+    },
+    "commit_info": {
+        "id": "b4faa815c27d1e5c331b243ab2c1962099cd2a96",
+        "time": "2022-06-08T10:25:06+01:00",
+        "author_time": "2022-06-08T10:25:06+01:00",
+        "dirty": false,
+        "project": "freebandlib",
+        "branch": "master"
+    },
+    "benchmarks": [
+        {
+            "group": null,
+            "name": "test_multiply[32-148732-169651-transducer14-transducer24]",
+            "fullname": "benchmarks/bench_interval_multiply_08.py::test_multiply[32-148732-169651-transducer14-transducer24]",
+            "param": "32-148732-169651-transducer14-transducer24",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.4997183750000005,
+                "max": 2.040778209000001,
+                "mean": 0.8183420083999998,
+                "stddev": 0.6834194199917724,
+                "rounds": 5,
+                "median": 0.5181914999999986,
+                "iqr": 0.39491998900000125,
+                "q1": 0.5074853127499992,
+                "q3": 0.9024053017500004,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 0.4997183750000005,
+                "hd15iqr": 2.040778209000001,
+                "ops": 1.2219829725656794,
+                "total": 4.091710041999999,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_multiply[32-20193-148732-transducer110-transducer210]",
+            "fullname": "benchmarks/bench_interval_multiply_08.py::test_multiply[32-20193-148732-transducer110-transducer210]",
+            "param": "32-20193-148732-transducer110-transducer210",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.24588854099999935,
+                "max": 0.30757812499999915,
+                "mean": 0.28136347479999985,
+                "stddev": 0.02253913714286887,
+                "rounds": 5,
+                "median": 0.28551412499999884,
+                "iqr": 0.02336602025000012,
+                "q1": 0.27043904175000044,
+                "q3": 0.29380506200000056,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 0.24588854099999935,
+                "hd15iqr": 0.30757812499999915,
+                "ops": 3.5541215884926958,
+                "total": 1.4068173739999992,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_multiply[32-12486-148732-transducer115-transducer215]",
+            "fullname": "benchmarks/bench_interval_multiply_08.py::test_multiply[32-12486-148732-transducer115-transducer215]",
+            "param": "32-12486-148732-transducer115-transducer215",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.24593170800000053,
+                "max": 1.5541147090000003,
+                "mean": 0.5112716251999998,
+                "stddev": 0.5829747541944136,
+                "rounds": 5,
+                "median": 0.25130033399999974,
+                "iqr": 0.3297693445000007,
+                "q1": 0.24950039549999925,
+                "q3": 0.57926974,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 0.24593170800000053,
+                "hd15iqr": 1.5541147090000003,
+                "ops": 1.9559074877445406,
+                "total": 2.5563581259999992,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_multiply[37-169651-172158-transducer121-transducer221]",
+            "fullname": "benchmarks/bench_interval_multiply_08.py::test_multiply[37-169651-172158-transducer121-transducer221]",
+            "param": "37-169651-172158-transducer121-transducer221",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.48540925,
+                "max": 1.938203167000001,
+                "mean": 0.9253586500000004,
+                "stddev": 0.6126195975699202,
+                "rounds": 5,
+                "median": 0.5829560000000029,
+                "iqr": 0.7572142919999996,
+                "q1": 0.5319287184999997,
+                "q3": 1.2891430104999992,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 0.48540925,
+                "hd15iqr": 1.938203167000001,
+                "ops": 1.0806620762663206,
+                "total": 4.626793250000002,
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2022-08-09T14:31:11.451146",
+    "version": "3.4.1"
+}
