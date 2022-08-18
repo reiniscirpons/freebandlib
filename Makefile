@@ -38,10 +38,10 @@ superclean: clean
 .PHONY: superclean
 
 benchmark-interval:
-	pytest -n 4 -v benchmarks/bench_interval.py --benchmark-save=interval
+	pytest -n auto -v benchmarks/bench_interval.py --benchmark-save=interval
 
 benchmark-equal:
-	pytest -n 6 -v benchmarks/bench_equal.py --benchmark-save=equal
+	pytest -n auto -v benchmarks/bench_equal.py --benchmark-save=equal
 
 INTERVAL_TEST_CASES = 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
 
@@ -57,14 +57,16 @@ benchmark-minimize: benchmark-minimize-generate-benchmarks
 benchmark-interval-multiply: benchmark-interval-multiply-generate-benchmarks
 	$(foreach var,$(INTERVAL_TEST_CASES),pytest -n 6 -v benchmarks/bench_interval_multiply_$(var).py --benchmark-save=interval_multiply;)
 
-benchmark-minimal-multiply: 
-	pytest -n 4 -v benchmarks/bench_minimal_multiply.py --benchmark-save=minimal_multiply
+benchmark-minimal-multiply:
+	pytest -n auto -v benchmarks/bench_minimal_multiply.py --benchmark-save=minimal_multiply
 
 benchmark-isomorphism:
-	pytest -n 4 -v benchmarks/bench_isomorphism.py --benchmark-save=isomorphism
+	pytest -n auto -v benchmarks/bench_isomorphism.py --benchmark-save=isomorphism
 
 benchmark-minword:
-	pytest -n 4 -v benchmarks/bench_minword.py --benchmark-save=minword
+	pytest -n auto -v benchmarks/bench_minword.py --benchmark-save=minword
+
+benchmark-all: benchmark-interval benchmark-equal  benchmark-minimize benchmark-interval-multiply benchmark-minimal-multiply benchmark-isomorphism benchmark-minword
 
 coverage:
 	@coverage run --source . --omit="tests/*" -m py.test

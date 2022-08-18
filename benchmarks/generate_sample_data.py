@@ -5,6 +5,8 @@ import random
 import os
 import gzip
 
+sys.path.append(os.path.abspath("../freebandlib"))
+
 from freebandlib import interval_transducer, transducer_minimize
 
 
@@ -16,11 +18,6 @@ def random_word_sample(length_alphabet, length_word, num_words):
     return [random_word(length_alphabet, length_word) for _ in range(num_words)]
 
 
-# def random_word(length_alphabet, length_word, length_content):
-#    """uniform"""
-#    pass
-
-
 def write_pickle_file(fname, sample, mode="wb"):
     with open(fname, mode) as f:
         pickle.dump(sample, f)
@@ -29,11 +26,6 @@ def write_pickle_file(fname, sample, mode="wb"):
 def write_gzip_pickle_file(fname, sample):
     with gzip.open(fname, "ab") as f:
         pickle.dump(sample, f)
-
-
-# length_alphabet: up to 100 in steps of 5
-# length_word: up to 10000 in steps of 500
-# num_words: 100
 
 
 def generate_words(alphabet_range, word_range, num_words):
@@ -93,20 +85,3 @@ def split_file(fname, num_parts):
                 pickle.dump(pickle.load(f), subfiles[n])
         except EOFError:
             break
-
-
-# Pre-processing:
-#
-# 1. [x] Generate a sample of random words (store) X
-# 2. [x] Generate interval transducers (store) X
-# 3. [x] Minimize the transducers from 2. (store)
-# 4. [ ] Random words over a given alphabet + content and generate pairs of them
-
-# Benchmarks
-# 1. [x] Benchmark creation of interval transducers from words
-# 2. [x] Benchmark minimization
-# 3. [x] Benchmark isomorphism checking of minimized transducers
-# 4. [x] Benchmark equality checking of pairs of words (1 + 2 + 3)
-# 5. [ ] Benchmark multiplication on interval transducers
-# 6. [ ] Benchmark multiplication on minimal transducers
-# 7. [x] Min. word of minimal transducers
