@@ -44,6 +44,9 @@ benchmark-equal:
 	pytest -n auto -v benchmarks/bench_equal.py --benchmark-save=equal
 
 INTERVAL_TEST_CASES = 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
+define benchmark_function
+	pytest -n auto -v benchmarks/bench_$(1).py --benchmark-storage=file://./benchmarks/raw_benchmark_data/ --benchmark-save=$(2)
+endef
 
 benchmark-minimize-generate-benchmarks:
 	$(foreach var,$(INTERVAL_TEST_CASES),sed 's/{{NUM}}/$(var)/g' ./benchmarks/templates/bench_minimize.py > ./benchmarks/bench_minimize_$(var).py;)
@@ -52,19 +55,29 @@ benchmark-interval-multiply-generate-benchmarks:
 	$(foreach var,$(INTERVAL_TEST_CASES),sed 's/{{NUM}}/$(var)/g' ./benchmarks/templates/bench_interval_multiply.py > ./benchmarks/bench_interval_multiply_$(var).py;)
 
 benchmark-minimize: benchmark-minimize-generate-benchmarks
-	$(foreach var,$(INTERVAL_TEST_CASES),pytest -n 6 -v benchmarks/bench_minimize_$(var).py --benchmark-save=minimize;)
+	mkdir -p ./benchmarks/raw_benchmark_data/
+	rm -f ./benchmarks/raw_benchmark_data/*/*_minimize.json
+	$(foreach var,$(INTERVAL_TEST_CASES),$(call benchmark_function,minimize_$(var),minimize);)
 
 benchmark-interval-multiply: benchmark-interval-multiply-generate-benchmarks
-	$(foreach var,$(INTERVAL_TEST_CASES),pytest -n 6 -v benchmarks/bench_interval_multiply_$(var).py --benchmark-save=interval_multiply;)
+	mkdir -p ./benchmarks/raw_benchmark_data/
+	rm -f ./benchmarks/raw_benchmark_data/*/*_interval_multiply.json
+	$(foreach var,$(INTERVAL_TEST_CASES),$(call benchmark_function,interval_multiply_$(var),interval_multiply);)
 
 benchmark-minimal-multiply:
-	pytest -n auto -v benchmarks/bench_minimal_multiply.py --benchmark-save=minimal_multiply
+	mkdir -p ./benchmarks/raw_benchmark_data/
+	rm -f ./benchmarks/raw_benchmark_data/*/*_minimal_multiply.json
+	$(call benchmark_function,minimal_multiply,minimal_multiply)
 
 benchmark-isomorphism:
-	pytest -n auto -v benchmarks/bench_isomorphism.py --benchmark-save=isomorphism
+	mkdir -p ./benchmarks/raw_benchmark_data/
+	rm -f ./benchmarks/raw_benchmark_data/*/*_isomorphism.json
+	$(call benchmark_function,isomorphism,isomorphism)
 
 benchmark-minword:
-	pytest -n auto -v benchmarks/bench_minword.py --benchmark-save=minword
+	mkdir -p ./benchmarks/raw_benchmark_data/
+	rm -f ./benchmarks/raw_benchmark_data/*/*_minword.json
+	$(call benchmark_function,minword,minword)
 
 benchmark-all: benchmark-interval benchmark-equal  benchmark-minimize benchmark-interval-multiply benchmark-minimal-multiply benchmark-isomorphism benchmark-minword
 

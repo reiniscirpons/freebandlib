@@ -8,8 +8,9 @@
 .coverage
 .tox/
 __pycache__/
-benchmarks/bench_minimize*
 benchmarks/samples/
+benchmarks/raw_benchmark_data/
+benchmarks/processed_benchmark_data/
 build/
 dist/
 docs/build/

@@ -17,22 +17,11 @@ import random
 # First 13 digits of the golden ratio.
 random.seed(1618033988749)
 
-from pytest_benchmark.utils import safe_dumps
-
-
-def __save(self, output_json, save):
-    output_file = self.get("%s_%s.json" % (self._next_num, save))
-    assert not output_file.exists()
-    for x in output_json["benchmarks"]:
-        del x["params"]
-    with output_file.open("wb") as fh:
-        fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
-    self.logger.info("Saved benchmark data in: %s" % output_file)
-
-
-pytest_benchmark.storage.file.FileStorage.save = __save
-
+import freebandlib
 from freebandlib import multiply, transducer_cont
+
+# Hack to prevent excessive benchmark output
+freebandlib.Transducer.__repr__ = lambda x : ""
 
 
 def get_samples(fnam):
