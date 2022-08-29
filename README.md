@@ -19,61 +19,22 @@ Type:
 
     python3 -m pip install -r tests/requirements.txt
 
-Then inside the `freebandlib` source code directory type:
+Then inside the `freebandlib` top level directory type:
 
     pytest
 
 ## To run the benchmarks
 
-Download the benchmark data files (i.e. input data for the benchmarks) from:
+Download the benchmark sample data files (i.e. input data for the benchmarks).
+To do so type:
 
-    TODO(RC)
+    ./get_benchmark_sample_data.sh
 
-and put the downloaded archive into the directory `benchmarks/samples`, then
-type:
+Then type:
 
     python3 -m pip install -r benchmarks/requirements.txt
     make benchmark-all
 
-Reference implementations of algorithms for operating with elements in the
-free band from the accompanying article **TODO: Article name**.
-
-## TODO:
-- [ ] Write article
-  - [ ] Preliminaries
-  - [x] Synchronous transducer rep
-  - [x] Equality checking
-  - [x] Multiplication
-  - [ ] Minimal word rep
-  - [ ] Minimal automaton rep
-  - [ ] Pictures
-- [ ] Write code
-  - [x] Datastructures and types for transducers
-  - [ ] Basic operations on transducers
-    - [x] Add state
-    - [x] Traverse
-    - [x] Underlying graph
-    - [x] Connected states
-    - [x] Topo order
-    - [x] Subtransducer
-    - [x] Trim
-    - [x] Minimize
-    - [ ] Disjoint union (for multiplying)
-  - [x] Basic operations on words
-    - [x] `pref`, `ltof`, `suff`, `ftol`
-    - [x] `cont`
-    - [x] word function `f_w`
-    - [x] rights, lefts
-  - [ ] Basic transducer constructions
-    - [x] Treelike
-    - [x] Interval
-    - [x] Minimal
-    - [ ] The one you get by right multiplying by a single letter (?)
-  - [ ] Multiplication
-  - [ ] Minimal word rep
-    - [ ] Largest intersection
-    - [ ] Iron out details of full algo
-  - [ ] Minimal automaton
-    - [ ] Figure out theory first
-- [ ] Write tests
-- [ ] Write docs
+It is also possible to generate entirely new benchmark sample data by using the
+code in `benchmarks/generate_sample_data.py`. 
+TODO(RC): Example of generating benchmarks
