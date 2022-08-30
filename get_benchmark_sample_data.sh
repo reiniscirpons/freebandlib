@@ -11,3 +11,4 @@ curl -L "$BASE_URL/$TAG/$PREFIX" -o "$OUT_DIR/$PREFIX"
 PREFIX="word-samples.tar.gz"
 curl -L "$BASE_URL/$TAG/$PREFIX" -o "$OUT_DIR/$PREFIX"
 tar -xf $OUT_DIR/$PREFIX
+rm $OUT_DIR/$PREFIX
