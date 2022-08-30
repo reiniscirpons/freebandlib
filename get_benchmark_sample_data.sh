@@ -4,7 +4,7 @@ TAG="v0.0.1"
 OUT_DIR="./benchmarks/samples"
 mkdir -p $OUT_DIR
 
-PREFIX="interval_transducer_"
+PREFIX="interval_transducers_"
 curl -L "$BASE_URL/$TAG/$PREFIX[00-19].gz" -o "$OUT_DIR/$PREFIX#1.gz"
 PREFIX="minimal_transducers.gz"
 curl -L "$BASE_URL/$TAG/$PREFIX" -o "$OUT_DIR/$PREFIX"
