@@ -23,6 +23,19 @@ from freebandlib import equal_in_free_band
 # Hack to prevent excessive benchmark output
 freebandlib.Transducer.__repr__ = lambda x : ""
 
+# An even worse hack to prevent benchmark output
+class SilentList:
+    def __init__(self, l):
+    	self.list = l
+    
+    def __iter__(self):
+    	return self.list.__iter__()	
+    
+    def __repr__(self):
+    	return ""
+    	
+    def __str__(self):
+    	return ""
 samples = []
 path = "benchmarks/samples"
 for x in sorted(os.listdir(path)):
@@ -36,7 +49,7 @@ samples_refined = []
 for alphabet_size, word_len, sample in samples:
     random.shuffle(sample)
     for word in sample[:10]:
-        samples_refined.append((word_len, alphabet_size, word))
+        samples_refined.append((word_len, alphabet_size, SilentList(word)))
 
 samples = []
 for word_len1, alphabet_size1, sample1 in samples_refined:
@@ -71,4 +84,4 @@ def test_equal_in_free_band(
 ):
     @benchmark
     def wrapper():
-        equal_in_free_band(word1, word2)
+        equal_in_free_band(word1.list, word2.list)
