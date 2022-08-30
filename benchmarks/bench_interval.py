@@ -20,7 +20,7 @@ freebandlib.Transducer.__repr__ = lambda x : ""
 samples = []
 path = "benchmarks/samples"
 for x in sorted(os.listdir(path)):
-    if x.startswith("."):
+    if x.startswith(".") or x.endswith(".gz"):
         continue
     sample = pickle.load(open(path + "/" + x, "rb"))
     m = re.search(r"_(\d\d\d\d)_.*_(\d\d\d\d)_", x)
