@@ -37,11 +37,7 @@ superclean: clean
 
 .PHONY: superclean
 
-benchmark-interval:
-	pytest -n auto -v benchmarks/bench_interval.py --benchmark-save=interval
 
-benchmark-equal:
-	pytest -n auto -v benchmarks/bench_equal.py --benchmark-save=equal
 
 INTERVAL_TEST_CASES = 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
 define benchmark_function
@@ -63,6 +59,16 @@ benchmark-interval-multiply: benchmark-interval-multiply-generate-benchmarks
 	mkdir -p ./benchmarks/raw_benchmark_data/
 	rm -f ./benchmarks/raw_benchmark_data/*/*_interval_multiply.json
 	$(foreach var,$(INTERVAL_TEST_CASES),$(call benchmark_function,interval_multiply_$(var),interval_multiply);)
+
+benchmark-interval:
+	mkdir -p ./benchmarks/raw_benchmark_data/
+	rm -f ./benchmarks/raw_benchmark_data/*/*_interval.json
+	$(call benchmark_function,interval,interval)
+
+benchmark-equal:
+	mkdir -p ./benchmarks/raw_benchmark_data/
+	rm -f ./benchmarks/raw_benchmark_data/*/*_equal.json
+	$(call benchmark_function,equal,equal)
 
 benchmark-minimal-multiply:
 	mkdir -p ./benchmarks/raw_benchmark_data/
