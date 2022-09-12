@@ -4,14 +4,19 @@
 This repository contains reference implementations of the algorithms described
 in the paper:
 
-    TODO(RC): authors, title, arxiv url
+    R. Cirpons and J. D. Mitchell
+    "Polynomial time multiplication and normal forms in free bands"
 
-Algorithm X is called Y in freebandlib TODO(RC) for all algorithms in the
-paper.
+The following table gives the correspondence between the formal algorithm description in the paper and the implementation in `freebandlib`.
 
-```python3
-something
-```
+| Algorithm in paper          | Algorithm in `freebandlib` |
+| --------------------------- | -------------------------- |
+| `IntervalTranducer`         | `interval_transducer`      |
+| `Minimize`                  | `transducer_minimize`      |
+| `TrimTransducerIsomorphism` | `transducer_isomorphism`   |
+| `EqualInFreeBand`           | `equal_in_free_band`       |
+| `Multiply`                  | `multiply`                 |
+| `MinWord`                   | `min_word`                 |
 
 ## To run the tests
 
@@ -37,4 +42,6 @@ Then type:
 
 It is also possible to generate entirely new benchmark sample data by using the
 code in `benchmarks/generate_sample_data.py`. 
-TODO(RC): Example of generating benchmarks
+
+The benchmarks can then be parsed by running `python3
+./benchmarks/extract_data.py`
