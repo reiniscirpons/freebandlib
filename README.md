@@ -1,4 +1,5 @@
 ![logo](./images/logo.svg)
+[![DOI](https://zenodo.org/badge/429050535.svg)](https://zenodo.org/badge/latestdoi/429050535)
 # Freebandlib
 
 This repository contains reference implementations of the algorithms described
