@@ -21,7 +21,7 @@ import freebandlib
 from freebandlib import multiply, transducer_cont
 
 # Hack to prevent excessive benchmark output
-freebandlib.Transducer.__repr__ = lambda x : ""
+freebandlib.Transducer.__repr__ = lambda x: ""
 
 
 def get_samples(fnam):

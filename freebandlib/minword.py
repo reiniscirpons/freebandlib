@@ -62,7 +62,7 @@ def min_word(t: Transducer) -> OutputWord:
     Parameters
     ----------
     t: Transducer
-        A transducer representing :math:`x\\in\\textrm{FB}(A)`.
+        The minimal transducer representing :math:`x\\in\\textrm{FB}(A)`.
 
     Returns
     -------

@@ -21,21 +21,23 @@ import freebandlib
 from freebandlib import equal_in_free_band
 
 # Hack to prevent excessive benchmark output
-freebandlib.Transducer.__repr__ = lambda x : ""
+freebandlib.Transducer.__repr__ = lambda x: ""
 
 # An even worse hack to prevent benchmark output
 class SilentList:
     def __init__(self, l):
-    	self.list = l
-    
+        self.list = l
+
     def __iter__(self):
-    	return self.list.__iter__()	
-    
+        return self.list.__iter__()
+
     def __repr__(self):
-    	return ""
-    	
+        return ""
+
     def __str__(self):
-    	return ""
+        return ""
+
+
 samples = []
 path = "benchmarks/samples"
 for x in sorted(os.listdir(path)):

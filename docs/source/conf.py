@@ -31,11 +31,11 @@ templates_path = ["_templates"]
 html_static_path = ["_static"]
 source_suffix = ".rst"
 master_doc = "index"
-project = u"freebandlib"
-copyright = u"2022, Reinis Cirpons + J. D. Mitchell"
-author = u"Reinis Cirpons + J. D. Mitchell"
-version = u"0.0.0"
-release = u"0.0.0"
+project = "freebandlib"
+copyright = "2022, Reinis Cirpons + J. D. Mitchell"
+author = "Reinis Cirpons + J. D. Mitchell"
+version = "0.0.0"
+release = "0.0.0"
 language = None
 exclude_patterns = ["_build"]
 pygments_style = "sphinx"
@@ -51,7 +51,7 @@ man_pages = [
     (
         master_doc,
         "freebandlib",
-        u"freebandlib Documentation",
+        "freebandlib Documentation",
         [author],
         1,
     )
